@@ -1,0 +1,56 @@
+require 'rails_helper'
+
+describe 'AdjudicationService' do
+  subject { AdjudicationService }
+
+  # adjudication test cases referenced from: http://web.inter.nl.net/users/L.B.Kruijswijk/#5
+  describe '#adjudicate' do
+    specify 'A.1 TEST CASE, MOVING TO AN AREA THAT IS NOT A NEIGHBOUR' do
+      position = build_position(area: 'North Sea', unit_type: Position::FLEET)
+      order = build_order(position: position, order_type: Order::MOVE, area_to: 'Picardy')
+      expect(subject.new([order]).adjudicate[order].status).to eq(Resolution::FAILED)
+    end
+
+    specify 'A.2. TEST CASE, MOVE ARMY TO SEA' do
+      position = build_position(area: 'Liverpool', unit_type: Position::ARMY)
+      order = build_order(position: position, order_type: Order::MOVE, area_to: 'Irish Sea')
+      expect(subject.new([order]).adjudicate[order].status).to eq(Resolution::FAILED)
+    end
+
+    specify 'A.3. TEST CASE, MOVE FLEET TO LAND' do
+      position = build_position(area: 'Kiel', unit_type: Position::FLEET)
+      order = build_order(position: position, order_type: Order::MOVE, area_to: 'Munich')
+      expect(subject.new([order]).adjudicate[order].status).to eq(Resolution::FAILED)
+    end
+
+    specify 'A.4. TEST CASE, MOVE TO OWN SECTOR' do
+      position = build_position(area: 'Kiel', unit_type: Position::FLEET)
+      order = build_order(position: position, order_type: Order::MOVE, area_to: 'Kiel')
+      expect(subject.new([order]).adjudicate[order].status).to eq(Resolution::FAILED)
+    end
+
+    specify 'A.5. TEST CASE, MOVE TO OWN SECTOR WITH CONVOY'
+
+    # A.6. TEST CASE, ORDERING A UNIT OF ANOTHER COUNTRY is not applicable because orders are associated with a position
+
+    specify 'A.7. TEST CASE, ONLY ARMIES CAN BE CONVOYED' do
+      london_fleet = build_position(area: 'London', unit_type: Position::FLEET)
+      north_sea_fleet = build_position(area: 'North Sea', unit_type: Position::FLEET)
+      convoy_order = build_order(position: north_sea_fleet, order_type: Order::CONVOY, area_from: 'London', area_to: 'Belgium')
+      move_order = build_order(position: london_fleet, order_type: Order::MOVE, area_to: 'Belgium')
+      orders = [convoy_order, move_order]
+      expect(subject.new(orders).adjudicate[move_order].status).to eq(Resolution::FAILED)
+    end
+
+    specify 'A.8. TEST CASE, SUPPORT TO HOLD YOURSELF IS NOT POSSIBLE' do
+      venice_army = build_position(nationality: Position::AUSTRIA, area: 'Venice', unit_type: Position::ARMY)
+      tyrolia_army = build_position(nationality: Position::AUSTRIA, area: 'Tyrolia', unit_type: Position::ARMY)
+      trieste_army = build_position(nationality: Position::ITALY, area: 'Trieste', unit_type: Position::ARMY)
+      venice_order = build_order(position: venice_army, order_type: Order::MOVE, area_to: 'Trieste')
+      tyrolia_order = build_order(position: tyrolia_army, order_type: Order::SUPPORT, area_from: 'Venice', area_to: 'Trieste')
+      trieste_order = build_order(position: trieste_army, order_type: Order::SUPPORT, area_from: 'Trieste', area_to: 'Trieste')
+      orders = [venice_order, tyrolia_order, trieste_order]
+      expect(subject.new(orders).adjudicate[trieste_order].status).to eq(Resolution::FAILED)
+    end
+  end
+end

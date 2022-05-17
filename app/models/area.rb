@@ -1,17 +1,18 @@
 class Area < ApplicationRecord
   LAND = 'land'.freeze
   SEA = 'sea'.freeze
-  TYPES = [LAND, SEA].freeze
+  AREA_TYPES = [LAND, SEA].freeze
 
   has_many :borders
   has_many :neighbors, through: :borders, class_name: 'Area', foreign_key: 'neighbor_id'
   has_many :coasts
 
-  validates_inclusion_of :area_type, in: TYPES
+  validates_inclusion_of :area_type, in: AREA_TYPES
 
   scope :land, -> { where(area_type: LAND) }
   scope :sea, -> { where(area_type: SEA) }
   scope :supply_center, -> { where(supply_center: true) }
+  scope :has_coasts, -> { joins(:coasts).distinct }
 
   def coasts?
     self.coasts.present?

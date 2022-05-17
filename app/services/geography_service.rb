@@ -1,15 +1,10 @@
 module GeographyService
-  def self.area_map
-    @@area_map ||= Area.all.index_by(&:id)
-    @@area_map
-  end
-
-  def self.neighbors_map
-    @@neighbors_map ||= Area.all.includes(:neighbors).reduce({}) do |map, area|
+  def self.neighbors(area)
+    @@neighbors_map ||= Area.includes(:neighbors).reduce({}) do |map, area|
       map[area] = area.neighbors.to_a
       map
     end
-    @@neighbors_map
+    @@neighbors_map[area]
   end
 
   def self.seed_areas

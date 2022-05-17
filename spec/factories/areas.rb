@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :area do
     name { Faker::Address.country }
-    area_type { Area::TYPES.sample }
+    area_type { Area::AREA_TYPES.sample }
     supply_center { [true, false].sample }
 
     trait :land do
