@@ -35,7 +35,8 @@ class Order < ApplicationRecord
   belongs_to :coast_from, class_name: 'Coast', optional: true
   belongs_to :coast_to, class_name: 'Coast', optional: true
 
-  validates_inclusion_of :status, in: RESOLUTIONS
+  # do not include UNRESOLVED as valid status because we should not persist unresolved orders
+  validates_inclusion_of :status, in: [FAILED, SUCCEEDED]
   validates_inclusion_of :order_type, in: ORDER_TYPES
 
   RESOLUTIONS.each do |resolution|

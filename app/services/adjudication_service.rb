@@ -39,7 +39,7 @@ class AdjudicationService
     end
 
     # if a move that requires a convoy does not have the required convoys, mark it failed
-    (@orders_by_type[Order::MOVE] || []).select { |order| PathService.requires_convoy?(order.position.area, order.area_to) }.each do |order|
+    @orders_by_type[Order::MOVE]&.select { |order| PathService.requires_convoy?(order.position.area, order.area_to) }.each do |order|
       valid_paths = PathService.possible_paths(order.position, @positions.without(order.position)).select do |path|
         (path.first == order.position.area) && (path.last == order.area_to)
       end.select do |path|
@@ -56,14 +56,7 @@ class AdjudicationService
   def resolve_order(order)
     order.resolution = case order.order_type
     when Order::MOVE
-      destinations = PathService.possible_paths(order.position, @positions.without(order.position)).map do |path|
-        path.last.is_a?(Array) ? path.last.first : path.last
-      end.uniq
-      if destinations.include?(order.area_to)
-        Order::SUCCEEDED
-      else
-        Order::FAILED
-      end
+      self.resolve_move(order)
     when Order::SUPPORT
       Order::SUCCEEDED
     when Order::CONVOY
@@ -73,5 +66,65 @@ class AdjudicationService
     else
       raise "Unsupported order type: #{order.order_type}"
     end
+  end
+
+  def resolve_move(order)
+    destinations = PathService.possible_paths(order.position, @positions.without(order.position)).map do |path|
+      path.last.is_a?(Array) ? path.last.first : path.last
+    end.uniq
+    if !destinations.include?(order.area_to)
+      Order::FAILED
+    else
+      attack_hash = self.generate_attack_hash(order.area_to)
+      sorted_attack_strengths = attack_hash.keys.sort_by { |strength| strength.last }.reverse
+      max_attack_strength = sorted_attack_strengths.first.last
+      conclusively_max_strength_orders = attack_hash.select do |strength_array|
+        strength_array.first == max_attack_strength
+      end.values.flatten
+
+      # subject order succeeds if it is only order capable of max strength
+      return Order::SUCCEEDED if conclusively_max_strength_orders.length == 1 && (conclusively_max_strength_orders.first == order)
+
+      # subject order fails if it is conclusively max strength, but there are multiple max strength orders (i.e. bounce)
+      return Order::FAILED if (conclusively_max_strength_orders.length > 1) && conclusively_max_strength_orders.include?(order)
+
+      order_attack_strength = attack_hash.keys.find { |strength_array| attack_hash[strength_array].include?(order) }
+      max_order_attack_strength = order_attack_strength.last
+
+      # subject order fails if its max strength is less than another order's minimum strength
+      return Order::FAILED if sorted_attack_strengths.any? { |strength_array| max_order_attack_strength < strength_array.first }
+
+      Order::UNRESOLVED
+    end
+  end
+
+  def generate_attack_hash(area)
+    @orders_by_type[Order::MOVE].select do |order|
+      order.area_to == area
+    end.group_by do |order|
+      self.attack_strength(order)
+    end
+  end
+
+  def attack_strength(order)
+    raise 'Attack strength not applicable to non-move orders' unless order.move?
+    # TODO: handle attacking own nationality
+    potential_support_orders = @orders_by_type[Order::SUPPORT]&.select do |support_order|
+      !support_order.failed? && (support_order.area_from == order.position.area) && (support_order.area_to == order.area_to)
+    end || []
+    successful_support_orders = potential_support_orders.select(&:succeeded?)
+    [1 + successful_support_orders.length, 1 + potential_support_orders.length]
+  end
+
+  def hold_strength(order)
+    # TODO
+  end
+
+  def prevent_strength(area)
+    # TODO
+  end
+
+  def defend_strength(area)
+    # TODO
   end
 end

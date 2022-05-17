@@ -85,5 +85,17 @@ describe 'AdjudicationService' do
       subject.new(orders).adjudicate
       expect(rome_order.resolution).to eq(Order::FAILED)
     end
+
+    specify 'A.11. TEST CASE, SIMPLE BOUNCE' do
+      venice_army = build_position(nationality: Position::ITALY, area: 'Venice', unit_type: Position::ARMY)
+      venice_order = build_order(position: venice_army, order_type: Order::MOVE, area_to: 'Tyrolia')
+      vienna_army = build_position(nationality: Position::AUSTRIA, area: 'Vienna', unit_type: Position::ARMY)
+      vienna_order = build_order(position: vienna_army, order_type: Order::MOVE, area_to: 'Tyrolia')
+      orders = [venice_order, vienna_order]
+
+      subject.new(orders).adjudicate
+      expect(venice_order.resolution).to eq(Order::FAILED)
+      expect(vienna_order.resolution).to eq(Order::FAILED)
+    end
   end
 end
