@@ -21,6 +21,7 @@ class CreateCoreTables < ActiveRecord::Migration[7.0]
       t.references :area, foreign_key: true, null: false
       t.references :neighbor, foreign_key: { to_table: :areas }, null: false
       t.references :coast, foreign_key: true, null: true, index: false
+      t.boolean :coastal, null: false, default: false
 
       t.index [:area_id, :neighbor_id, :coast_id], unique: true
       t.timestamps

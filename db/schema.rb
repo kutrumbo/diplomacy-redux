@@ -24,6 +24,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_16_055833) do
     t.integer "area_id", null: false
     t.integer "neighbor_id", null: false
     t.integer "coast_id"
+    t.boolean "coastal", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["area_id", "neighbor_id", "coast_id"], name: "index_borders_on_area_id_and_neighbor_id_and_coast_id", unique: true

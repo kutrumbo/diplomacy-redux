@@ -26,7 +26,9 @@ module PathService
   private
 
   def self.fleet_accessible(area)
-    GeographyService.neighbors(area).select { |a| a.sea? || a.coastal? }
+    GeographyService.neighbors(area).select do |neighbor|
+      neighbor.sea? || area.borders.find_by(neighbor: neighbor).coastal?
+    end
   end
 
   def self.fleet_possible_paths(position)
