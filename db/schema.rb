@@ -48,6 +48,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_16_055833) do
     t.integer "area_to_id"
     t.integer "coast_from_id"
     t.integer "coast_to_id"
+    t.string "resolution"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["area_from_id"], name: "index_orders_on_area_from_id"
@@ -68,14 +69,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_16_055833) do
     t.index ["coast_id"], name: "index_positions_on_coast_id"
   end
 
-  create_table "resolutions", force: :cascade do |t|
-    t.string "status", null: false
-    t.integer "order_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["order_id"], name: "index_resolutions_on_order_id"
-  end
-
   add_foreign_key "borders", "areas"
   add_foreign_key "borders", "areas", column: "neighbor_id"
   add_foreign_key "borders", "coasts"
@@ -87,5 +80,4 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_16_055833) do
   add_foreign_key "orders", "positions"
   add_foreign_key "positions", "areas"
   add_foreign_key "positions", "coasts"
-  add_foreign_key "resolutions", "orders"
 end

@@ -19,17 +19,38 @@ class Order < ApplicationRecord
     SUPPORT,
   ].freeze
 
+  FAILED = 'failed'.freeze
+  SUCCEEDED = 'succeeded'.freeze
+  UNRESOLVED = 'unresolved'.freeze
+
+  RESOLUTIONS = [
+    FAILED,
+    SUCCEEDED,
+    UNRESOLVED,
+  ].freeze
+
   belongs_to :position
   belongs_to :area_from, class_name: 'Area', optional: true
   belongs_to :area_to, class_name: 'Area', optional: true
   belongs_to :coast_from, class_name: 'Coast', optional: true
   belongs_to :coast_to, class_name: 'Coast', optional: true
 
+  validates_inclusion_of :status, in: RESOLUTIONS
   validates_inclusion_of :order_type, in: ORDER_TYPES
+
+  RESOLUTIONS.each do |resolution|
+    define_method("#{resolution}?") do
+      self.resolution == resolution
+    end
+  end
 
   ORDER_TYPES.each do |order_type|
     define_method("#{order_type}?") do
       self.order_type == order_type
     end
+  end
+
+  def unresolved?
+    self.resolution.nil?
   end
 end

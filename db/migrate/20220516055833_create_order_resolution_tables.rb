@@ -16,13 +16,7 @@ class CreateOrderResolutionTables < ActiveRecord::Migration[7.0]
       t.references :area_to, null: true, foreign_key: { to_table: :areas }
       t.references :coast_from, null: true, foreign_key: { to_table: :coasts }
       t.references :coast_to, null: true, foreign_key: { to_table: :coasts }
-
-      t.timestamps
-    end
-
-    create_table :resolutions do |t|
-      t.string :status, null: false
-      t.references :order, foreign_key: true, null: false
+      t.string :resolution, null: true
 
       t.timestamps
     end
