@@ -21,12 +21,10 @@ class Order < ApplicationRecord
 
   FAILED = 'failed'.freeze
   SUCCEEDED = 'succeeded'.freeze
-  UNRESOLVED = 'unresolved'.freeze
 
   RESOLUTIONS = [
     FAILED,
     SUCCEEDED,
-    UNRESOLVED,
   ].freeze
 
   belongs_to :position
@@ -49,6 +47,10 @@ class Order < ApplicationRecord
     define_method("#{order_type}?") do
       self.order_type == order_type
     end
+  end
+
+  def resolved?
+    self.resolution.present?
   end
 
   def unresolved?

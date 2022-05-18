@@ -6,10 +6,21 @@ module Helpers
   end
 
   def build_position(nationality: Position::AUSTRIA, area:, unit_type:, coast: nil)
-    build(:position, nationality: nationality, area: find_area(area), coast: coast, unit_type: unit_type)
+    area_model = find_area(area)
+    coast_model = coast && area_model.coasts.find_by(direction: coast)
+    raise "Invalid coast direction: #{coast} for area: #{area_name}" if (coast && !coast_model)
+    build(:position, nationality: nationality, area: area_model, coast: coast_model, unit_type: unit_type)
   end
 
-  def build_order(position:, order_type:, area_from: nil, area_to: nil)
-    build(:order, position: position, order_type: order_type, area_from: find_area(area_from), area_to: find_area(area_to))
+  def build_order(position:, order_type:, area_from: nil, area_to: nil, coast_to: nil)
+    area_to_model = find_area(area_to)
+    coast_model = coast_to && area_to_model.coasts.find_by(direction: coast_to)
+    raise "Invalid coast direction: #{coast_to} for area: #{area_to}" if (coast_to && !coast_model)
+    area_from_model = if area_from
+      find_area(area_from)
+    elsif order_type == Order::MOVE
+      position.area
+    end
+    build(:order, position: position, order_type: order_type, area_from: area_from_model, area_to: area_to_model, coast_to: coast_model)
   end
 end

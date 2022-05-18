@@ -23,6 +23,16 @@ module PathService
     !GeographyService.neighbors(from).include?(to)
   end
 
+  def self.valid_destination?(order, positions)
+    destinations = PathService.possible_paths(order.position, positions.without(order.position)).map(&:last)
+
+    if order.position.army? || !order.area_to.coasts?
+      destinations.find { |destination| (destination.is_a?(Array) ? destination.first : destination) == order.area_to }.present?
+    else
+      destinations.find { |destination| destination.is_a?(Array) && (destination.first == order.area_to) && (destination.last == order.coast_to) }.present?
+    end
+  end
+
   private
 
   def self.fleet_accessible(area)
