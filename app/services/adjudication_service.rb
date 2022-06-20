@@ -150,8 +150,19 @@ class AdjudicationService
     # order fails if its max strength is less than another order's minimum strength
     return Order::FAILED if sorted_attack_strengths.any? { |strength_array| max_order_attack_strength < strength_array.first }
 
-    # order fails if it is conclusively max strength, but there are multiple max strength orders (i.e. bounce)
-    return Order::FAILED if (conclusively_max_strength_orders.length > 1) && conclusively_max_strength_orders.include?(order)
+    # check for bounce
+    if (conclusively_max_strength_orders.length > 1) && conclusively_max_strength_orders.include?(order)
+      competing_orders = conclusively_max_strength_orders.without(order)
+      # remove any competing orders that are dislodged as they do not factor into bounces
+      competing_orders.reject! do |competing_order|
+        @orders.select(&:move?).select(&:succeeded?).any? { |potentially_dislodging_order| potentially_dislodging_order.area_to == competing_order.position.area }
+      end
+      # if all other competing orders failed, then subject order succeeds
+      return Order::SUCCEEDED if competing_orders.empty?
+
+      # fails due to bounce if other competing orders
+      return Order::FAILED if (competing_orders.any? && competing_orders.all? { |co| self.dependencies_resolved?(co) })
+    end
 
     if target_resist_strength.present?
       # order fails if its maximum strength is less than or equal to minimum target hold strength
@@ -330,12 +341,23 @@ class AdjudicationService
       # consider graph cyclical if it is two opposing convoy orders
       return true if corresponding_orders.select { |o| o.move? && PathService.requires_convoy?(o.area_from, o.area_to) }.length == 2
     end
-    # cyclic if two orders
-    # return true if (graph.length == 2 && @orders.select { |}
+
+    # cyclic if no nodes are a sink
     graph.find do |area_id|
       index = @move_area_ids.index(area_id)
       # if no nodes are positive, that index corresponds to a sink
       @incidence_matrix[index].count(-1) == 0
     end.nil?
+  end
+
+  def dependent_orders(order)
+    @orders.without(order).select do |o|
+      (o.move? && o.area_to == order.position.area) ||
+        ((o.support? || o.convoy?) && o.area_from == order.position.area)
+    end
+  end
+
+  def dependencies_resolved?(order)
+    self.dependent_orders(order).all?(&:resolved?)
   end
 end

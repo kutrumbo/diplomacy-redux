@@ -854,6 +854,22 @@ describe 'AdjudicationService' do
     # prevented at order level
     specify 'D.34. TEST CASE, SUPPORT TARGETING OWN AREA NOT ALLOWED'
 
-    specify 'E.1. TEST CASE, DISLODGED UNIT HAS NO EFFECT ON ATTACKERS AREA'
+    specify 'E.1. TEST CASE, DISLODGED UNIT HAS NO EFFECT ON ATTACKERS AREA' do
+      berlin_army = build_position(nationality: Position::GERMANY, area: 'Berlin', unit_type: Position::ARMY)
+      berlin_order = build_order(position: berlin_army, order_type: Order::MOVE, area_to: 'Prussia')
+      kiel_fleet = build_position(nationality: Position::GERMANY, area: 'Kiel', unit_type: Position::FLEET)
+      kiel_order = build_order(position: kiel_fleet, order_type: Order::MOVE, area_to: 'Berlin')
+      silesia_army = build_position(nationality: Position::GERMANY, area: 'Silesia', unit_type: Position::ARMY)
+      silesia_order = build_order(position: silesia_army, order_type: Order::SUPPORT, area_from: 'Berlin', area_to: 'Prussia')
+      prussia_army = build_position(nationality: Position::RUSSIA, area: 'Prussia', unit_type: Position::ARMY)
+      prussia_order = build_order(position: prussia_army, order_type: Order::MOVE, area_to: 'Berlin')
+      orders = [berlin_order, kiel_order, silesia_order, prussia_order]
+
+      subject.new(orders).adjudicate
+      expect(berlin_order.resolution).to eq(Order::SUCCEEDED)
+      expect(kiel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(silesia_order.resolution).to eq(Order::SUCCEEDED)
+      expect(prussia_order.resolution).to eq(Order::FAILED)
+    end
   end
 end
