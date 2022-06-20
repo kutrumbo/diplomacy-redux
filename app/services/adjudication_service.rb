@@ -161,7 +161,7 @@ class AdjudicationService
       return Order::SUCCEEDED if competing_orders.empty?
 
       # fails due to bounce if other competing orders
-      return Order::FAILED if (competing_orders.any? && competing_orders.all? { |co| self.dependencies_resolved?(co) })
+      return Order::FAILED if (competing_orders.any? && competing_orders.all? { |co| co.failed? || self.dependencies_resolved?(co) })
     end
 
     if target_resist_strength.present?
@@ -177,8 +177,7 @@ class AdjudicationService
 
           # reduce attack strength by target nationality's support because they cannot assist in dislodging their own unit
           if (target_originating_order.present? && (!target_originating_order.move? || (target_originating_order.move? && target_originating_order.failed?)))
-            support_reduction = @support_hash[order]&.select { |supporting_order| supporting_order.position.nationality == target_nationality }&.length || 0
-            adjusted_attack_strength -= support_reduction
+            adjusted_attack_strength -= self.support_reduction(order, target_originating_order)
           end
           return (adjusted_attack_strength > target_resist_strength.last) ? Order::SUCCEEDED : Order::FAILED
         end
@@ -231,8 +230,9 @@ class AdjudicationService
         attacking_order = attacking_orders.first
 
         # calculate reduction factor if hold order nationality is supporting the attacking order
-        support_reduction = @support_hash[attacking_order]&.select { |support_orders| support_orders.succeeded? && (support_orders.position.nationality == order.position.nationality) }&.length || 0
-        adjusted_attack_strength = attacking_order_key.first - support_reduction
+        adjusted_attack_strength = attacking_order_key.first - self.support_reduction(attacking_order, order)
+
+        # hold succeeds if adjusted attack strength results in hold exceeding strength, or a bounce between other attacks
         return Order::SUCCEEDED if adjusted_attack_strength <= area_hold_strength.last
 
         # hold fails if there is a single attacker with highest attack strength greater than hold
@@ -269,9 +269,7 @@ class AdjudicationService
 
   def attack_strength(order)
     raise 'Attack strength not applicable to non-move orders' unless order.move?
-    potential_support_orders = @orders.select(&:support?).select do |support_order|
-      !support_order.failed? && (support_order.area_from == order.position.area) && (support_order.area_to == order.area_to)
-    end
+    potential_support_orders = (@support_hash[order] || []).reject(&:failed?)
     successful_support_orders = potential_support_orders.select(&:succeeded?)
     [1 + successful_support_orders.length, 1 + potential_support_orders.length]
   end
@@ -297,6 +295,12 @@ class AdjudicationService
         return false
       end
     end
+  end
+
+  def support_reduction(attacking_order, originating_order)
+    @support_hash[attacking_order]&.select do |support_order|
+      support_order.succeeded? && (support_order.position.nationality == originating_order.position.nationality)
+    end&.length || 0
   end
 
   private

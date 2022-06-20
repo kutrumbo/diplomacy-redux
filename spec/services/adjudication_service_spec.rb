@@ -871,5 +871,150 @@ describe 'AdjudicationService' do
       expect(silesia_order.resolution).to eq(Order::SUCCEEDED)
       expect(prussia_order.resolution).to eq(Order::FAILED)
     end
+
+    specify 'E.2. TEST CASE, NO SELF DISLODGEMENT IN HEAD TO HEAD BATTLE' do
+      berlin_army = build_position(nationality: Position::GERMANY, area: 'Berlin', unit_type: Position::ARMY)
+      berlin_order = build_order(position: berlin_army, order_type: Order::MOVE, area_to: 'Kiel')
+      kiel_fleet = build_position(nationality: Position::GERMANY, area: 'Kiel', unit_type: Position::FLEET)
+      kiel_order = build_order(position: kiel_fleet, order_type: Order::MOVE, area_to: 'Berlin')
+      munich_army = build_position(nationality: Position::GERMANY, area: 'Munich', unit_type: Position::ARMY)
+      munich_order = build_order(position: munich_army, order_type: Order::SUPPORT, area_from: 'Berlin', area_to: 'Kiel')
+      orders = [berlin_order, kiel_order, munich_order]
+
+      subject.new(orders).adjudicate
+      expect(berlin_order.resolution).to eq(Order::FAILED)
+      expect(kiel_order.resolution).to eq(Order::FAILED)
+      expect(munich_order.resolution).to eq(Order::SUCCEEDED)
+    end
+
+    specify 'E.3. TEST CASE, NO HELP IN DISLODGING OWN UNIT' do
+      berlin_army = build_position(nationality: Position::GERMANY, area: 'Berlin', unit_type: Position::ARMY)
+      berlin_order = build_order(position: berlin_army, order_type: Order::MOVE, area_to: 'Kiel')
+      munich_army = build_position(nationality: Position::GERMANY, area: 'Munich', unit_type: Position::ARMY)
+      munich_order = build_order(position: munich_army, order_type: Order::SUPPORT, area_from: 'Kiel', area_to: 'Berlin')
+      kiel_fleet = build_position(nationality: Position::ENGLAND, area: 'Kiel', unit_type: Position::FLEET)
+      kiel_order = build_order(position: kiel_fleet, order_type: Order::MOVE, area_to: 'Berlin')
+      orders = [berlin_order, munich_order, kiel_order]
+
+      subject.new(orders).adjudicate
+      expect(berlin_order.resolution).to eq(Order::FAILED)
+      expect(munich_order.resolution).to eq(Order::SUCCEEDED)
+      expect(kiel_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'E.4. TEST CASE, NON-DISLODGED LOSER HAS STILL EFFECT' do
+      holland_fleet = build_position(nationality: Position::GERMANY, area: 'Holland', unit_type: Position::FLEET)
+      holland_order = build_order(position: holland_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+      helgoland_fleet = build_position(nationality: Position::GERMANY, area: 'Heligoland Bight', unit_type: Position::FLEET)
+      helgoland_order = build_order(position: helgoland_fleet, order_type: Order::SUPPORT, area_from: 'Holland', area_to: 'North Sea')
+      skagerrak_fleet = build_position(nationality: Position::GERMANY, area: 'Skagerrak', unit_type: Position::FLEET)
+      skagerrak_order = build_order(position: skagerrak_fleet, order_type: Order::SUPPORT, area_from: 'Holland', area_to: 'North Sea')
+
+      north_sea_fleet = build_position(nationality: Position::FRANCE, area: 'North Sea', unit_type: Position::FLEET)
+      north_sea_order = build_order(position: north_sea_fleet, order_type: Order::MOVE, area_to: 'Holland')
+      belgium_fleet = build_position(nationality: Position::FRANCE, area: 'Belgium', unit_type: Position::FLEET)
+      belgium_order = build_order(position: belgium_fleet, order_type: Order::SUPPORT, area_from: 'North Sea', area_to: 'Holland')
+
+      edinburgh_fleet = build_position(nationality: Position::ENGLAND, area: 'Edinburgh', unit_type: Position::FLEET)
+      edinburgh_order = build_order(position: edinburgh_fleet, order_type: Order::SUPPORT, area_from: 'Norwegian Sea', area_to: 'North Sea')
+      yorkshire_fleet = build_position(nationality: Position::ENGLAND, area: 'Yorkshire', unit_type: Position::FLEET)
+      yorkshire_order = build_order(position: yorkshire_fleet, order_type: Order::SUPPORT, area_from: 'Norwegian Sea', area_to: 'North Sea')
+      norwegian_sea_fleet = build_position(nationality: Position::ENGLAND, area: 'Norwegian Sea', unit_type: Position::FLEET)
+      norwegian_sea_order = build_order(position: norwegian_sea_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+
+      kiel_army = build_position(nationality: Position::AUSTRIA, area: 'Kiel', unit_type: Position::ARMY)
+      kiel_order = build_order(position: kiel_army, order_type: Order::SUPPORT, area_from: 'Ruhr', area_to: 'Holland')
+      ruhr_army = build_position(nationality: Position::AUSTRIA, area: 'Ruhr', unit_type: Position::ARMY)
+      ruhr_order = build_order(position: ruhr_army, order_type: Order::MOVE, area_to: 'Holland')
+
+      orders = [holland_order, helgoland_order, skagerrak_order, north_sea_order, belgium_order, edinburgh_order, yorkshire_order, norwegian_sea_order, kiel_order, ruhr_order]
+
+      subject.new(orders).adjudicate
+      expect(holland_order.resolution).to eq(Order::FAILED)
+      expect(helgoland_order.resolution).to eq(Order::SUCCEEDED)
+      expect(skagerrak_order.resolution).to eq(Order::SUCCEEDED)
+      expect(north_sea_order.resolution).to eq(Order::FAILED)
+      expect(belgium_order.resolution).to eq(Order::SUCCEEDED)
+      expect(edinburgh_order.resolution).to eq(Order::SUCCEEDED)
+      expect(yorkshire_order.resolution).to eq(Order::SUCCEEDED)
+      expect(norwegian_sea_order.resolution).to eq(Order::FAILED)
+      expect(kiel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(ruhr_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'E.5. TEST CASE, LOSER DISLODGED BY ANOTHER ARMY HAS STILL EFFECT' do
+      holland_fleet = build_position(nationality: Position::GERMANY, area: 'Holland', unit_type: Position::FLEET)
+      holland_order = build_order(position: holland_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+      helgoland_fleet = build_position(nationality: Position::GERMANY, area: 'Heligoland Bight', unit_type: Position::FLEET)
+      helgoland_order = build_order(position: helgoland_fleet, order_type: Order::SUPPORT, area_from: 'Holland', area_to: 'North Sea')
+      skagerrak_fleet = build_position(nationality: Position::GERMANY, area: 'Skagerrak', unit_type: Position::FLEET)
+      skagerrak_order = build_order(position: skagerrak_fleet, order_type: Order::SUPPORT, area_from: 'Holland', area_to: 'North Sea')
+
+      north_sea_fleet = build_position(nationality: Position::FRANCE, area: 'North Sea', unit_type: Position::FLEET)
+      north_sea_order = build_order(position: north_sea_fleet, order_type: Order::MOVE, area_to: 'Holland')
+      belgium_fleet = build_position(nationality: Position::FRANCE, area: 'Belgium', unit_type: Position::FLEET)
+      belgium_order = build_order(position: belgium_fleet, order_type: Order::SUPPORT, area_from: 'North Sea', area_to: 'Holland')
+
+      edinburgh_fleet = build_position(nationality: Position::ENGLAND, area: 'Edinburgh', unit_type: Position::FLEET)
+      edinburgh_order = build_order(position: edinburgh_fleet, order_type: Order::SUPPORT, area_from: 'Norwegian Sea', area_to: 'North Sea')
+      yorkshire_fleet = build_position(nationality: Position::ENGLAND, area: 'Yorkshire', unit_type: Position::FLEET)
+      yorkshire_order = build_order(position: yorkshire_fleet, order_type: Order::SUPPORT, area_from: 'Norwegian Sea', area_to: 'North Sea')
+      norwegian_sea_fleet = build_position(nationality: Position::ENGLAND, area: 'Norwegian Sea', unit_type: Position::FLEET)
+      norwegian_sea_order = build_order(position: norwegian_sea_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+      london_fleet = build_position(nationality: Position::ENGLAND, area: 'London', unit_type: Position::FLEET)
+      london_order = build_order(position: london_fleet, order_type: Order::SUPPORT, area_from: 'Norwegian Sea', area_to: 'North Sea')
+
+      kiel_army = build_position(nationality: Position::AUSTRIA, area: 'Kiel', unit_type: Position::ARMY)
+      kiel_order = build_order(position: kiel_army, order_type: Order::SUPPORT, area_from: 'Ruhr', area_to: 'Holland')
+      ruhr_army = build_position(nationality: Position::AUSTRIA, area: 'Ruhr', unit_type: Position::ARMY)
+      ruhr_order = build_order(position: ruhr_army, order_type: Order::MOVE, area_to: 'Holland')
+
+      orders = [holland_order, helgoland_order, skagerrak_order, north_sea_order, belgium_order, edinburgh_order, yorkshire_order, norwegian_sea_order, london_order, kiel_order, ruhr_order]
+
+      subject.new(orders).adjudicate
+      expect(holland_order.resolution).to eq(Order::FAILED)
+      expect(helgoland_order.resolution).to eq(Order::SUCCEEDED)
+      expect(skagerrak_order.resolution).to eq(Order::SUCCEEDED)
+      expect(north_sea_order.resolution).to eq(Order::FAILED)
+      expect(belgium_order.resolution).to eq(Order::SUCCEEDED)
+      expect(edinburgh_order.resolution).to eq(Order::SUCCEEDED)
+      expect(yorkshire_order.resolution).to eq(Order::SUCCEEDED)
+      expect(norwegian_sea_order.resolution).to eq(Order::SUCCEEDED)
+      expect(london_order.resolution).to eq(Order::SUCCEEDED)
+      expect(kiel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(ruhr_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'E.6. TEST CASE, NOT DISLODGE BECAUSE OF OWN SUPPORT HAS STILL EFFECT' do
+      holland_fleet = build_position(nationality: Position::GERMANY, area: 'Holland', unit_type: Position::FLEET)
+      holland_order = build_order(position: holland_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+      helgoland_fleet = build_position(nationality: Position::GERMANY, area: 'Heligoland Bight', unit_type: Position::FLEET)
+      helgoland_order = build_order(position: helgoland_fleet, order_type: Order::SUPPORT, area_from: 'Holland', area_to: 'North Sea')
+
+      north_sea_fleet = build_position(nationality: Position::FRANCE, area: 'North Sea', unit_type: Position::FLEET)
+      north_sea_order = build_order(position: north_sea_fleet, order_type: Order::MOVE, area_to: 'Holland')
+      belgium_fleet = build_position(nationality: Position::FRANCE, area: 'Belgium', unit_type: Position::FLEET)
+      belgium_order = build_order(position: belgium_fleet, order_type: Order::SUPPORT, area_from: 'North Sea', area_to: 'Holland')
+      english_channel_fleet = build_position(nationality: Position::FRANCE, area: 'English Channel', unit_type: Position::FLEET)
+      english_channel_order = build_order(position: english_channel_fleet, order_type: Order::SUPPORT, area_from: 'Holland', area_to: 'North Sea')
+
+      kiel_army = build_position(nationality: Position::AUSTRIA, area: 'Kiel', unit_type: Position::ARMY)
+      kiel_order = build_order(position: kiel_army, order_type: Order::SUPPORT, area_from: 'Ruhr', area_to: 'Holland')
+      ruhr_army = build_position(nationality: Position::AUSTRIA, area: 'Ruhr', unit_type: Position::ARMY)
+      ruhr_order = build_order(position: ruhr_army, order_type: Order::MOVE, area_to: 'Holland')
+
+      orders = [holland_order, helgoland_order, north_sea_order, belgium_order, english_channel_order, kiel_order, ruhr_order]
+
+      subject.new(orders).adjudicate
+      expect(holland_order.resolution).to eq(Order::FAILED)
+      expect(helgoland_order.resolution).to eq(Order::SUCCEEDED)
+      expect(north_sea_order.resolution).to eq(Order::FAILED)
+      expect(belgium_order.resolution).to eq(Order::SUCCEEDED)
+      expect(english_channel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(kiel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(ruhr_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'E.7. TEST CASE, NO SELF DISLODGEMENT WITH BELEAGUERED GARRISON'
   end
 end
