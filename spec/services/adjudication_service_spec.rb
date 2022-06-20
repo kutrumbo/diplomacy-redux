@@ -218,12 +218,12 @@ describe 'AdjudicationService' do
     end
 
     # testing same condition as B.7.
-    # specify 'B.8. TEST CASE, SUPPORTING WITH UNSPECIFIED COAST WHEN ONLY ONE COAST IS POSSIBLE'
+    specify 'B.8. TEST CASE, SUPPORTING WITH UNSPECIFIED COAST WHEN ONLY ONE COAST IS POSSIBLE'
     # not applicable to order schema
-    # specify 'B.9. TEST CASE, SUPPORTING WITH WRONG COAST'
-    # specify 'B.10. TEST CASE, UNIT ORDERED WITH WRONG COAST'
-    # specify 'B.11. TEST CASE, COAST CAN NOT BE ORDERED TO CHANGE'
-    # specify 'B.12. TEST CASE, ARMY MOVEMENT WITH COASTAL SPECIFICATION'
+    specify 'B.9. TEST CASE, SUPPORTING WITH WRONG COAST'
+    specify 'B.10. TEST CASE, UNIT ORDERED WITH WRONG COAST'
+    specify 'B.11. TEST CASE, COAST CAN NOT BE ORDERED TO CHANGE'
+    specify 'B.12. TEST CASE, ARMY MOVEMENT WITH COASTAL SPECIFICATION'
 
     specify 'B.13. TEST CASE, COASTAL CRAWL NOT ALLOWED' do
       bulgaria_fleet = build_position(nationality: Position::TURKEY, area: 'Bulgaria', coast: 'south', unit_type: Position::FLEET)
@@ -574,5 +574,286 @@ describe 'AdjudicationService' do
       expect(venice_order.resolution).to eq(Order::FAILED)
       expect(trieste_order.resolution).to eq(Order::SUCCEEDED)
     end
+
+    specify 'D.13. TEST CASE, SUPPORTING A FOREIGN UNIT TO DISLODGE A RETURNING OWN UNIT PROHIBITED' do
+      trieste_fleet = build_position(nationality: Position::AUSTRIA, area: 'Trieste', unit_type: Position::FLEET)
+      trieste_order = build_order(position: trieste_fleet, order_type: Order::MOVE, area_to: 'Adriatic Sea')
+      vienna_army = build_position(nationality: Position::AUSTRIA, area: 'Vienna', unit_type: Position::ARMY)
+      vienna_order = build_order(position: vienna_army, order_type: Order::SUPPORT, area_from: 'Venice', area_to: 'Trieste')
+      venice_army = build_position(nationality: Position::ITALY, area: 'Venice', unit_type: Position::ARMY)
+      venice_order = build_order(position: venice_army, order_type: Order::MOVE, area_to: 'Trieste')
+      apulia_fleet = build_position(nationality: Position::ITALY, area: 'Apulia', unit_type: Position::FLEET)
+      apulia_order = build_order(position: apulia_fleet, order_type: Order::MOVE, area_to: 'Adriatic Sea')
+      orders = [trieste_order, vienna_order, venice_order, apulia_order]
+
+      subject.new(orders).adjudicate
+      expect(trieste_order.resolution).to eq(Order::FAILED)
+      expect(vienna_order.resolution).to eq(Order::SUCCEEDED)
+      expect(venice_order.resolution).to eq(Order::FAILED)
+      expect(apulia_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'D.14. TEST CASE, SUPPORTING A FOREIGN UNIT IS NOT ENOUGH TO PREVENT DISLODGEMENT' do
+      trieste_fleet = build_position(nationality: Position::AUSTRIA, area: 'Trieste', unit_type: Position::FLEET)
+      trieste_order = build_order(position: trieste_fleet, order_type: Order::HOLD)
+      vienna_army = build_position(nationality: Position::AUSTRIA, area: 'Vienna', unit_type: Position::ARMY)
+      vienna_order = build_order(position: vienna_army, order_type: Order::SUPPORT, area_from: 'Venice', area_to: 'Trieste')
+      venice_army = build_position(nationality: Position::ITALY, area: 'Venice', unit_type: Position::ARMY)
+      venice_order = build_order(position: venice_army, order_type: Order::MOVE, area_to: 'Trieste')
+      tyrolia_army = build_position(nationality: Position::ITALY, area: 'Tyrolia', unit_type: Position::ARMY)
+      tyrolia_order = build_order(position: tyrolia_army, order_type: Order::SUPPORT, area_from: 'Venice', area_to: 'Trieste')
+      adriatic_fleet = build_position(nationality: Position::ITALY, area: 'Adriatic Sea', unit_type: Position::FLEET)
+      adriatic_order = build_order(position: adriatic_fleet, order_type: Order::SUPPORT, area_from: 'Venice', area_to: 'Trieste')
+      orders = [trieste_order, vienna_order, venice_order, tyrolia_order, adriatic_order]
+
+      subject.new(orders).adjudicate
+      expect(trieste_order.resolution).to eq(Order::FAILED)
+      expect(vienna_order.resolution).to eq(Order::SUCCEEDED)
+      expect(venice_order.resolution).to eq(Order::SUCCEEDED)
+      expect(tyrolia_order.resolution).to eq(Order::SUCCEEDED)
+      expect(adriatic_order.resolution).to eq(Order::SUCCEEDED)
+    end
+
+    specify 'D.15. TEST CASE, DEFENDER CAN NOT CUT SUPPORT FOR ATTACK ON ITSELF' do
+      constantinople_fleet = build_position(nationality: Position::RUSSIA, area: 'Constantinople', unit_type: Position::FLEET)
+      constantinople_order = build_order(position: constantinople_fleet, order_type: Order::SUPPORT, area_from: 'Black Sea', area_to: 'Ankara')
+      black_fleet = build_position(nationality: Position::RUSSIA, area: 'Black Sea', unit_type: Position::FLEET)
+      black_order = build_order(position: black_fleet, order_type: Order::MOVE, area_to: 'Ankara')
+      ankara_fleet = build_position(nationality: Position::TURKEY, area: 'Ankara', unit_type: Position::FLEET)
+      ankara_order = build_order(position: ankara_fleet, order_type: Order::MOVE, area_to: 'Constantinople')
+      orders = [constantinople_order, black_order, ankara_order]
+
+      subject.new(orders).adjudicate
+      expect(constantinople_order.resolution).to eq(Order::SUCCEEDED)
+      expect(black_order.resolution).to eq(Order::SUCCEEDED)
+      expect(ankara_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'D.16. TEST CASE, CONVOYING A UNIT DISLODGING A UNIT OF SAME POWER IS ALLOWED' do
+      london_army = build_position(nationality: Position::ENGLAND, area: 'London', unit_type: Position::ARMY)
+      london_order = build_order(position: london_army, order_type: Order::HOLD)
+      north_sea_fleet = build_position(nationality: Position::ENGLAND, area: 'North Sea', unit_type: Position::FLEET)
+      north_sea_order = build_order(position: north_sea_fleet, order_type: Order::CONVOY, area_from: 'Belgium', area_to: 'London')
+      english_channel_fleet = build_position(nationality: Position::FRANCE, area: 'English Channel', unit_type: Position::FLEET)
+      english_channel_order = build_order(position: english_channel_fleet, order_type: Order::SUPPORT, area_from: 'Belgium', area_to: 'London')
+      belgium_army = build_position(nationality: Position::FRANCE, area: 'Belgium', unit_type: Position::ARMY)
+      belgium_order = build_order(position: belgium_army, order_type: Order::MOVE, area_to: 'London')
+      orders = [london_order, north_sea_order, english_channel_order, belgium_order]
+
+      subject.new(orders).adjudicate
+      expect(london_order.resolution).to eq(Order::FAILED)
+      expect(north_sea_order.resolution).to eq(Order::SUCCEEDED)
+      expect(english_channel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(belgium_order.resolution).to eq(Order::SUCCEEDED)
+    end
+
+    specify 'D.17. TEST CASE, DISLODGEMENT CUTS SUPPORTS' do
+      constantinople_fleet = build_position(nationality: Position::RUSSIA, area: 'Constantinople', unit_type: Position::FLEET)
+      constantinople_order = build_order(position: constantinople_fleet, order_type: Order::SUPPORT, area_from: 'Black Sea', area_to: 'Ankara')
+      black_sea_fleet = build_position(nationality: Position::RUSSIA, area: 'Black Sea', unit_type: Position::FLEET)
+      black_sea_order = build_order(position: black_sea_fleet, order_type: Order::MOVE, area_to: 'Ankara')
+      ankara_fleet = build_position(nationality: Position::TURKEY, area: 'Ankara', unit_type: Position::FLEET)
+      ankara_order = build_order(position: ankara_fleet, order_type: Order::MOVE, area_to: 'Constantinople')
+      smyrna_army = build_position(nationality: Position::TURKEY, area: 'Smyrna', unit_type: Position::ARMY)
+      smyrna_order = build_order(position: smyrna_army, order_type: Order::SUPPORT, area_from: 'Ankara', area_to: 'Constantinople')
+      armenia_army = build_position(nationality: Position::TURKEY, area: 'Armenia', unit_type: Position::ARMY)
+      armenia_order = build_order(position: armenia_army, order_type: Order::MOVE, area_to: 'Ankara')
+      orders = [constantinople_order, black_sea_order, ankara_order, smyrna_order, armenia_order]
+
+      subject.new(orders).adjudicate
+      expect(constantinople_order.resolution).to eq(Order::FAILED)
+      expect(black_sea_order.resolution).to eq(Order::FAILED)
+      expect(ankara_order.resolution).to eq(Order::SUCCEEDED)
+      expect(smyrna_order.resolution).to eq(Order::SUCCEEDED)
+      expect(armenia_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'D.18. TEST CASE, A SURVIVING UNIT WILL SUSTAIN SUPPORT' do
+      constantinople_fleet = build_position(nationality: Position::RUSSIA, area: 'Constantinople', unit_type: Position::FLEET)
+      constantinople_order = build_order(position: constantinople_fleet, order_type: Order::SUPPORT, area_from: 'Black Sea', area_to: 'Ankara')
+      black_sea_fleet = build_position(nationality: Position::RUSSIA, area: 'Black Sea', unit_type: Position::FLEET)
+      black_sea_order = build_order(position: black_sea_fleet, order_type: Order::MOVE, area_to: 'Ankara')
+      bulgaria_army = build_position(nationality: Position::RUSSIA, area: 'Bulgaria', unit_type: Position::ARMY)
+      bulgaria_order = build_order(position: bulgaria_army, order_type: Order::SUPPORT, area_from: 'Constantinople', area_to: 'Constantinople')
+      ankara_fleet = build_position(nationality: Position::TURKEY, area: 'Ankara', unit_type: Position::FLEET)
+      ankara_order = build_order(position: ankara_fleet, order_type: Order::MOVE, area_to: 'Constantinople')
+      smyrna_army = build_position(nationality: Position::TURKEY, area: 'Smyrna', unit_type: Position::ARMY)
+      smyrna_order = build_order(position: smyrna_army, order_type: Order::SUPPORT, area_from: 'Ankara', area_to: 'Constantinople')
+      armenia_army = build_position(nationality: Position::TURKEY, area: 'Armenia', unit_type: Position::ARMY)
+      armenia_order = build_order(position: armenia_army, order_type: Order::MOVE, area_to: 'Ankara')
+      orders = [constantinople_order, black_sea_order, bulgaria_order, ankara_order, smyrna_order, armenia_order]
+
+      subject.new(orders).adjudicate
+      expect(constantinople_order.resolution).to eq(Order::SUCCEEDED)
+      expect(black_sea_order.resolution).to eq(Order::SUCCEEDED)
+      expect(bulgaria_order.resolution).to eq(Order::SUCCEEDED)
+      expect(ankara_order.resolution).to eq(Order::FAILED)
+      expect(smyrna_order.resolution).to eq(Order::SUCCEEDED)
+      expect(armenia_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'D.19. TEST CASE, EVEN WHEN SURVIVING IS IN ALTERNATIVE WAY' do
+      constantinople_fleet = build_position(nationality: Position::RUSSIA, area: 'Constantinople', unit_type: Position::FLEET)
+      constantinople_order = build_order(position: constantinople_fleet, order_type: Order::SUPPORT, area_from: 'Black Sea', area_to: 'Ankara')
+      black_sea_fleet = build_position(nationality: Position::RUSSIA, area: 'Black Sea', unit_type: Position::FLEET)
+      black_sea_order = build_order(position: black_sea_fleet, order_type: Order::MOVE, area_to: 'Ankara')
+      bulgaria_army = build_position(nationality: Position::RUSSIA, area: 'Bulgaria', unit_type: Position::ARMY)
+      bulgaria_order = build_order(position: bulgaria_army, order_type: Order::SUPPORT, area_from: 'Constantinople', area_to: 'Constantinople')
+      ankara_fleet = build_position(nationality: Position::TURKEY, area: 'Ankara', unit_type: Position::FLEET)
+      ankara_order = build_order(position: ankara_fleet, order_type: Order::MOVE, area_to: 'Constantinople')
+      orders = [constantinople_order, black_sea_order, bulgaria_order, ankara_order]
+
+      subject.new(orders).adjudicate
+      expect(constantinople_order.resolution).to eq(Order::SUCCEEDED)
+      expect(black_sea_order.resolution).to eq(Order::SUCCEEDED)
+      expect(bulgaria_order.resolution).to eq(Order::SUCCEEDED)
+      expect(ankara_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'D.20. TEST CASE, UNIT CAN NOT CUT SUPPORT OF ITS OWN COUNTRY' do
+      london_fleet = build_position(nationality: Position::ENGLAND, area: 'London', unit_type: Position::FLEET)
+      london_order = build_order(position: london_fleet, order_type: Order::SUPPORT, area_from: 'North Sea', area_to: 'English Channel')
+      north_sea_fleet = build_position(nationality: Position::ENGLAND, area: 'North Sea', unit_type: Position::FLEET)
+      north_sea_order = build_order(position: north_sea_fleet, order_type: Order::MOVE, area_to: 'English Channel')
+      yorkshire_army = build_position(nationality: Position::ENGLAND, area: 'Yorkshire', unit_type: Position::ARMY)
+      yorkshire_order = build_order(position: yorkshire_army, order_type: Order::MOVE, area_to: 'London')
+      english_channel_fleet = build_position(nationality: Position::FRANCE, area: 'English Channel', unit_type: Position::FLEET)
+      english_channel_order = build_order(position: english_channel_fleet, order_type: Order::HOLD)
+      orders = [london_order, north_sea_order, yorkshire_order, english_channel_order]
+
+      subject.new(orders).adjudicate
+      expect(london_order.resolution).to eq(Order::SUCCEEDED)
+      expect(north_sea_order.resolution).to eq(Order::SUCCEEDED)
+      expect(yorkshire_order.resolution).to eq(Order::FAILED)
+      expect(english_channel_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'D.21. TEST CASE, DISLODGING DOES NOT CANCEL A SUPPORT CUT' do
+      trieste_fleet = build_position(nationality: Position::AUSTRIA, area: 'Trieste', unit_type: Position::FLEET)
+      trieste_order = build_order(position: trieste_fleet, order_type: Order::HOLD)
+      venice_army = build_position(nationality: Position::ITALY, area: 'Venice', unit_type: Position::ARMY)
+      venice_order = build_order(position: venice_army, order_type: Order::MOVE, area_to: 'Trieste')
+      tyrolia_army = build_position(nationality: Position::ITALY, area: 'Tyrolia', unit_type: Position::ARMY)
+      tyrolia_order = build_order(position: tyrolia_army, order_type: Order::SUPPORT, area_from: 'Venice', area_to: 'Trieste')
+      munich_army = build_position(nationality: Position::GERMANY, area: 'Munich', unit_type: Position::ARMY)
+      munich_order = build_order(position: munich_army, order_type: Order::MOVE, area_to: 'Tyrolia')
+      silesia_army = build_position(nationality: Position::RUSSIA, area: 'Silesia', unit_type: Position::ARMY)
+      silesia_order = build_order(position: silesia_army, order_type: Order::MOVE, area_to: 'Munich')
+      berlin_army = build_position(nationality: Position::RUSSIA, area: 'Berlin', unit_type: Position::ARMY)
+      berlin_order = build_order(position: berlin_army, order_type: Order::SUPPORT, area_from: 'Silesia', area_to: 'Munich')
+      orders = [trieste_order, venice_order, tyrolia_order, munich_order, silesia_order, berlin_order]
+
+      subject.new(orders).adjudicate
+      expect(trieste_order.resolution).to eq(Order::SUCCEEDED)
+      expect(venice_order.resolution).to eq(Order::FAILED)
+      expect(tyrolia_order.resolution).to eq(Order::FAILED)
+      expect(munich_order.resolution).to eq(Order::FAILED)
+      expect(silesia_order.resolution).to eq(Order::SUCCEEDED)
+      expect(berlin_order.resolution).to eq(Order::SUCCEEDED)
+    end
+
+    # prevented at order level
+    specify 'D.22. TEST CASE, IMPOSSIBLE FLEET MOVE CAN NOT BE SUPPORTED'
+    specify 'D.23 TEST CASE, IMPOSSIBLE COAST MOVE CAN NOT BE SUPPORTED'
+    specify 'D.24. TEST CASE, IMPOSSIBLE ARMY MOVE CAN NOT BE SUPPORTED'
+
+    specify 'D.25. TEST CASE, FAILING HOLD SUPPORT CAN BE SUPPORTED' do
+      berlin_army = build_position(nationality: Position::GERMANY, area: 'Berlin', unit_type: Position::ARMY)
+      berlin_order = build_order(position: berlin_army, order_type: Order::SUPPORT, area_from: 'Prussia', area_to: 'Prussia')
+      kiel_fleet = build_position(nationality: Position::GERMANY, area: 'Kiel', unit_type: Position::FLEET)
+      kiel_order = build_order(position: kiel_fleet, order_type: Order::SUPPORT, area_from: 'Berlin', area_to: 'Berlin')
+      baltic_fleet = build_position(nationality: Position::RUSSIA, area: 'Baltic Sea', unit_type: Position::FLEET)
+      baltic_order = build_order(position: baltic_fleet, order_type: Order::SUPPORT, area_from: 'Prussia', area_to: 'Berlin')
+      prussia_army = build_position(nationality: Position::RUSSIA, area: 'Prussia', unit_type: Position::ARMY)
+      prussia_order = build_order(position: prussia_army, order_type: Order::MOVE, area_to: 'Berlin')
+      orders = [berlin_order, kiel_order, baltic_order, prussia_order]
+
+      subject.new(orders).adjudicate
+      expect(berlin_order.resolution).to eq(Order::FAILED)
+      expect(kiel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(baltic_order.resolution).to eq(Order::SUCCEEDED)
+      expect(prussia_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'D.26. TEST CASE, FAILING MOVE SUPPORT CAN BE SUPPORTED' do
+      berlin_army = build_position(nationality: Position::GERMANY, area: 'Berlin', unit_type: Position::ARMY)
+      berlin_order = build_order(position: berlin_army, order_type: Order::SUPPORT, area_from: 'Prussia', area_to: 'Silesia')
+      kiel_fleet = build_position(nationality: Position::GERMANY, area: 'Kiel', unit_type: Position::FLEET)
+      kiel_order = build_order(position: kiel_fleet, order_type: Order::SUPPORT, area_from: 'Berlin', area_to: 'Berlin')
+      baltic_fleet = build_position(nationality: Position::RUSSIA, area: 'Baltic Sea', unit_type: Position::FLEET)
+      baltic_order = build_order(position: baltic_fleet, order_type: Order::SUPPORT, area_from: 'Prussia', area_to: 'Berlin')
+      prussia_army = build_position(nationality: Position::RUSSIA, area: 'Prussia', unit_type: Position::ARMY)
+      prussia_order = build_order(position: prussia_army, order_type: Order::MOVE, area_to: 'Berlin')
+      orders = [berlin_order, kiel_order, baltic_order, prussia_order]
+
+      subject.new(orders).adjudicate
+      expect(berlin_order.resolution).to eq(Order::FAILED)
+      expect(kiel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(baltic_order.resolution).to eq(Order::SUCCEEDED)
+      expect(prussia_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'D.27. TEST CASE, FAILING CONVOY CAN BE SUPPORTED' do
+      sweden_fleet = build_position(nationality: Position::ENGLAND, area: 'Sweden', unit_type: Position::FLEET)
+      sweden_order = build_order(position: sweden_fleet, order_type: Order::MOVE, area_to: 'Baltic Sea')
+      denmark_fleet = build_position(nationality: Position::ENGLAND, area: 'Denmark', unit_type: Position::FLEET)
+      denmark_order = build_order(position: denmark_fleet, order_type: Order::SUPPORT, area_from: 'Sweden', area_to: 'Baltic Sea')
+      berlin_army = build_position(nationality: Position::GERMANY, area: 'Berlin', unit_type: Position::ARMY)
+      berlin_order = build_order(position: berlin_army, order_type: Order::HOLD)
+      baltic_fleet = build_position(nationality: Position::RUSSIA, area: 'Baltic Sea', unit_type: Position::FLEET)
+      baltic_order = build_order(position: baltic_fleet, order_type: Order::CONVOY, area_from: 'Berlin', area_to: 'Livonia')
+      prussia_fleet = build_position(nationality: Position::RUSSIA, area: 'Prussia', unit_type: Position::FLEET)
+      prussia_order = build_order(position: prussia_fleet, order_type: Order::SUPPORT, area_from: 'Baltic Sea', area_to: 'Baltic Sea')
+      orders = [sweden_order, denmark_order, berlin_order, baltic_order, prussia_order]
+
+      subject.new(orders).adjudicate
+      expect(sweden_order.resolution).to eq(Order::FAILED)
+      expect(denmark_order.resolution).to eq(Order::SUCCEEDED)
+      expect(berlin_order.resolution).to eq(Order::SUCCEEDED)
+      expect(baltic_order.resolution).to eq(Order::FAILED)
+      expect(prussia_order.resolution).to eq(Order::SUCCEEDED)
+    end
+
+    # prevented at order level
+    specify 'D.28. TEST CASE, IMPOSSIBLE MOVE AND SUPPORT'
+    specify 'D.29. TEST CASE, MOVE TO IMPOSSIBLE COAST AND SUPPORT'
+    specify 'D.30. TEST CASE, MOVE WITHOUT COAST AND SUPPORT'
+
+    specify 'D.31. TEST CASE, A TRICKY IMPOSSIBLE SUPPORT' do
+      rumania_army = build_position(nationality: Position::AUSTRIA, area: 'Rumania', unit_type: Position::ARMY)
+      rumania_order = build_order(position: rumania_army, order_type: Order::MOVE, area_to: 'Armenia')
+      black_sea_fleet = build_position(nationality: Position::TURKEY, area: 'Black Sea', unit_type: Position::FLEET)
+      black_sea_order = build_order(position: black_sea_fleet, order_type: Order::SUPPORT, area_from: 'Rumania', area_to: 'Armenia')
+      orders = [rumania_order, black_sea_order]
+
+      subject.new(orders).adjudicate
+      expect(rumania_order.resolution).to eq(Order::FAILED)
+    end
+
+    # prevented at order level
+    specify 'D.32. TEST CASE, A MISSING FLEET'
+
+    specify 'D.33. TEST CASE, UNWANTED SUPPORT ALLOWED' do
+      serbia_army = build_position(nationality: Position::AUSTRIA, area: 'Serbia', unit_type: Position::ARMY)
+      serbia_order = build_order(position: serbia_army, order_type: Order::MOVE, area_to: 'Budapest')
+      vienna_army = build_position(nationality: Position::AUSTRIA, area: 'Vienna', unit_type: Position::ARMY)
+      vienna_order = build_order(position: vienna_army, order_type: Order::MOVE, area_to: 'Budapest')
+      galicia_army = build_position(nationality: Position::RUSSIA, area: 'Galicia', unit_type: Position::ARMY)
+      galicia_order = build_order(position: galicia_army, order_type: Order::SUPPORT, area_from: 'Serbia', area_to: 'Budapest')
+      bulgaria_army = build_position(nationality: Position::TURKEY, area: 'Bulgaria', unit_type: Position::ARMY)
+      bulgaria_order = build_order(position: bulgaria_army, order_type: Order::MOVE, area_to: 'Serbia')
+      orders = [serbia_order, vienna_order, galicia_order, bulgaria_order]
+
+      subject.new(orders).adjudicate
+      expect(serbia_order.resolution).to eq(Order::SUCCEEDED)
+      expect(vienna_order.resolution).to eq(Order::FAILED)
+      expect(galicia_order.resolution).to eq(Order::SUCCEEDED)
+      expect(bulgaria_order.resolution).to eq(Order::SUCCEEDED)
+    end
+
+    # prevented at order level
+    specify 'D.34. TEST CASE, SUPPORT TARGETING OWN AREA NOT ALLOWED'
+
+    specify 'E.1. TEST CASE, DISLODGED UNIT HAS NO EFFECT ON ATTACKERS AREA'
   end
 end

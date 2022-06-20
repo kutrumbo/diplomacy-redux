@@ -195,12 +195,18 @@ class AdjudicationService
     # support order is unresolved if any potential cutting orders require a convoy but are unresolved
     return nil if potential_cutting_orders.any? { |cutting_order| cutting_order.unresolved? && PathService.requires_convoy?(cutting_order.position.area, cutting_order.area_to) }
 
-    cutting_orders = potential_cutting_orders.reject { |cutting_order| cutting_order.failed? && PathService.requires_convoy?(cutting_order.position.area, cutting_order.area_to) }
+    # cutting order does not succeed if it requires a convoy which failed
+    #   or if the cutting order originates from where support is attacking
+    #   or if cutting order is the same nationality as the support
+    cutting_orders = potential_cutting_orders.reject do |cutting_order|
+      (cutting_order.failed? && PathService.requires_convoy?(cutting_order.position.area, cutting_order.area_to)) ||
+        (cutting_order.position.area == order.area_to) ||
+        (cutting_order.position.nationality === order.position.nationality)
+    end
 
-    # support fails if there are cutting orders
     return Order::FAILED if cutting_orders.present?
 
-    Order::SUCCEEDED
+    resolve_hold(order)
   end
 
   def resolve_hold(order)
