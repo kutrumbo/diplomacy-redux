@@ -1,0 +1,13 @@
+{
+  "name": "app",
+  "private": "true",
+  "dependencies": {
+    "esbuild": "^0.16.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "scripts": {
+    "build": "esbuild app/javascript/*.* --bundle --outdir=app/assets/builds --loader:.js=jsx",
+    "start": "node esbuild-dev.config.js"
+  }
+}
