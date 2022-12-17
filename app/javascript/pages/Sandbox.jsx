@@ -19,6 +19,11 @@ export default function Sandbox() {
 
   const sortedAreas = sortBy(areas, 'name');
 
+  const removeOrder = (index) => {
+    orders.splice(index, 1)
+    setOrders([...orders]);
+  };
+
   const updateOrder = (index, order) => {
     orders[index] = order;
     setOrders([...orders]);
@@ -42,11 +47,13 @@ export default function Sandbox() {
             key={index}
             areas={sortedAreas}
             order={order}
-            updateOrder={partial(updateOrder, index)}
+            orders={orders}
+            removeOrder={partial(removeOrder, index)}
             resolution={resolutions[index + 1]}
+            updateOrder={partial(updateOrder, index)}
           />
         ))}
-        <Button onClick={() => setOrders([...orders, { id: orders.length + 1 }])} text="Add Order" />
+        <Button onClick={() => setOrders([...orders, { id: orders.length + 1 }])} text="Add Order" neutral />
         <Button className="my-6" onClick={submitOrders} text="Submit Orders" />
         <Map positions={positions} areasById={areasById} />
       </div>

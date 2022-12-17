@@ -1,9 +1,10 @@
 import React from 'react';
 import { capitalize } from 'lodash';
 import { NATIONALITIES, ORDER_TYPES, UNIT_TYPES } from '../const';
+import Button from './Button';
 import Select from './Select';
 
-export default function OrderInput({ areas, order, resolution, updateOrder }) {
+export default function OrderInput({ areas, order, orders, resolution, removeOrder, updateOrder }) {
 
   const onChange = (event) => {
     const updatedOrder = { ...order, [event.target.name]: event.target.value };
@@ -51,6 +52,7 @@ export default function OrderInput({ areas, order, resolution, updateOrder }) {
           {Object.values(areas).map(area => <option key={area.id} value={area.id}>{area.name}</option>)}
         </Select>
       )}
+      {(orders.length !== 1) && <Button text="Remove" danger onClick={removeOrder} />}
       {resolution}
     </div>
   );
