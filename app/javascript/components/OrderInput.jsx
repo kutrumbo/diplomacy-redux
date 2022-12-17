@@ -7,11 +7,16 @@ export default function OrderInput({ areas, order, resolution, updateOrder }) {
 
   const onChange = (event) => {
     const updatedOrder = { ...order, [event.target.name]: event.target.value };
-    if (updatedOrder.orderType === ORDER_TYPES.HOLD) {
+    if (event.target.name === 'orderType') {
+      updatedOrder.areaFrom = null;
       updatedOrder.areaTo = null;
     }
-    if ([ORDER_TYPES.HOLD, ORDER_TYPES.MOVE].includes(updatedOrder.orderType)) {
-      updatedOrder.areaFrom = null;
+    if (updatedOrder.orderType === ORDER_TYPES.HOLD) {
+      updatedOrder.areaFrom = updatedOrder.area;
+      updatedOrder.areaTo = updatedOrder.area;
+    }
+    if (updatedOrder.orderType === ORDER_TYPES.MOVE) {
+      updatedOrder.areaFrom = updatedOrder.area;
     }
     updateOrder(updatedOrder);
   };
