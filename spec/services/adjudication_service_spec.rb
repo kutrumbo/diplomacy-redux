@@ -1124,5 +1124,49 @@ describe 'AdjudicationService' do
       expect(mid_atlantic_order.resolution).to eq(Order::SUCCEEDED)
       expect(paris_order.resolution).to eq(Order::FAILED)
     end
+
+    specify 'F.4. TEST CASE, AN ATTACKED CONVOY IS NOT DISRUPTED' do
+      north_sea_fleet = build_position(nationality: Position::ENGLAND, area: 'North Sea', unit_type: Position::FLEET)
+      north_sea_order = build_order(position: north_sea_fleet, order_type: Order::CONVOY, area_from: 'London', area_to: 'Holland')
+      london_army = build_position(nationality: Position::ENGLAND, area: 'London', unit_type: Position::ARMY)
+      london_order = build_order(position: london_army, order_type: Order::MOVE, area_to: 'Holland')
+
+      skagerrak_fleet = build_position(nationality: Position::GERMANY, area: 'Skagerrak', unit_type: Position::FLEET)
+      skagerrak_order = build_order(position: skagerrak_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+
+      orders = [north_sea_order, london_order, skagerrak_order]
+
+      subject.new(orders).adjudicate
+      expect(north_sea_order.resolution).to eq(Order::SUCCEEDED)
+      expect(london_order.resolution).to eq(Order::SUCCEEDED)
+      expect(skagerrak_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'F.5. TEST CASE, A BELEAGUERED CONVOY IS NOT DISRUPTED' do
+      north_sea_fleet = build_position(nationality: Position::ENGLAND, area: 'North Sea', unit_type: Position::FLEET)
+      north_sea_order = build_order(position: north_sea_fleet, order_type: Order::CONVOY, area_from: 'London', area_to: 'Holland')
+      london_army = build_position(nationality: Position::ENGLAND, area: 'London', unit_type: Position::ARMY)
+      london_order = build_order(position: london_army, order_type: Order::MOVE, area_to: 'Holland')
+
+      english_channel_fleet = build_position(nationality: Position::FRANCE, area: 'English Channel', unit_type: Position::FLEET)
+      english_channel_order = build_order(position: english_channel_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+      belgium_fleet = build_position(nationality: Position::FRANCE, area: 'Belgium', unit_type: Position::FLEET)
+      belgium_order = build_order(position: belgium_fleet, order_type: Order::SUPPORT, area_from: 'English Channel', area_to: 'North Sea')
+
+      skagerrak_fleet = build_position(nationality: Position::GERMANY, area: 'Skagerrak', unit_type: Position::FLEET)
+      skagerrak_order = build_order(position: skagerrak_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+      denmark_fleet = build_position(nationality: Position::GERMANY, area: 'Denmark', unit_type: Position::FLEET)
+      denmark_order = build_order(position: denmark_fleet, order_type: Order::SUPPORT, area_from: 'Skagerrak', area_to: 'North Sea')
+
+      orders = [north_sea_order, london_order, english_channel_order, belgium_order, skagerrak_order, denmark_order]
+
+      subject.new(orders).adjudicate
+      expect(north_sea_order.resolution).to eq(Order::SUCCEEDED)
+      expect(london_order.resolution).to eq(Order::SUCCEEDED)
+      expect(english_channel_order.resolution).to eq(Order::FAILED)
+      expect(belgium_order.resolution).to eq(Order::SUCCEEDED)
+      expect(skagerrak_order.resolution).to eq(Order::FAILED)
+      expect(denmark_order.resolution).to eq(Order::SUCCEEDED)
+    end
   end
 end
