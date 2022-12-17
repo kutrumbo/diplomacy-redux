@@ -1,10 +1,14 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import Sandbox from './components/Sandbox';
+import { ApiProvider } from '@reduxjs/toolkit/query/react';
+import { api } from './api';
+import Sandbox from './pages/Sandbox';
 
 function App() {
   return (
-    <Sandbox />
+    <ApiProvider api={api}>
+      <Sandbox />
+    </ApiProvider>
   );
 }
 
