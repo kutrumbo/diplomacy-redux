@@ -6,5 +6,8 @@ Rails.application.routes.draw do
 
   namespace :api do
     resources :areas, only: [:index]
+    resources :orders, only: [] do
+      post 'adjudicate', on: :collection
+    end
   end
 end

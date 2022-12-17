@@ -1,21 +1,21 @@
 export const NATIONALITIES = {
-  AUSTRIA: 'Austria',
-  ENGLAND: 'England',
-  FRANCE: 'France',
-  GERMANY: 'Germany',
-  ITALY: 'Italy',
-  RUSSIA: 'Russia',
-  TURKEY: 'Turkey',
+  AUSTRIA: 'austria',
+  ENGLAND: 'england',
+  FRANCE: 'france',
+  GERMANY: 'germany',
+  ITALY: 'italy',
+  RUSSIA: 'russia',
+  TURKEY: 'turkey',
 };
 
 export const ORDER_TYPES = {
-  CONVOY: 'Convoy',
-  HOLD: 'Hold',
-  MOVE: 'Move',
-  SUPPORT: 'Support',
+  CONVOY: 'convoy',
+  HOLD: 'hold',
+  MOVE: 'move',
+  SUPPORT: 'support',
 };
 
 export const UNIT_TYPES = {
-  ARMY: 'Army',
-  FLEET: 'Fleet',
+  ARMY: 'army',
+  FLEET: 'fleet',
 };
