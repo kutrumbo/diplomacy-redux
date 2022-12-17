@@ -8,6 +8,16 @@ export const NATIONALITIES = {
   TURKEY: 'turkey',
 };
 
+export const NATIONALITY_COLORS = {
+  [NATIONALITIES.AUSTRIA]: 'fill-rose-500',
+  [NATIONALITIES.ENGLAND]: 'fill-indigo-600',
+  [NATIONALITIES.FRANCE]: 'fill-cyan-500',
+  [NATIONALITIES.GERMANY]: 'fill-stone-600',
+  [NATIONALITIES.ITALY]: 'fill-green-500',
+  [NATIONALITIES.RUSSIA]: 'fill-slate-500',
+  [NATIONALITIES.TURKEY]: 'fill-amber-500',
+};
+
 export const ORDER_TYPES = {
   CONVOY: 'convoy',
   HOLD: 'hold',

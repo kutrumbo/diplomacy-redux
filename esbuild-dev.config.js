@@ -7,7 +7,7 @@ const watch = process.argv.includes('--watch')
 const clients = []
 
 const watchOptions = {
-  onRebuild: (error, result) => {
+  onRebuild: (error) => {
     if (error) {
       console.error('Build failed:', error)
     } else {
@@ -24,12 +24,17 @@ require("esbuild").build({
   outdir: path.join(process.cwd(), "app/assets/builds"),
   absWorkingDir: path.join(process.cwd(), "app/javascript"),
   watch: watch && watchOptions,
+  loader: {
+    ".jpg": "file",
+    ".svg": "file",
+    ".js": "jsx",
+  },
   banner: {
     js: ' (() => new EventSource("http://localhost:8082").onmessage = () => location.reload())();',
   },
 }).catch(() => process.exit(1));
 
-http.createServer((req, res) => {
+http.createServer((_, res) => {
   return clients.push(
     res.writeHead(200, {
       "Content-Type": "text/event-stream",

@@ -3,12 +3,19 @@ import { partial, sortBy } from 'lodash';
 import { useAdjudicateOrdersMutation, useGetAreasQuery } from '../api';
 import Button from '../components/Button';
 import OrderInput from '../components/OrderInput';
+import Map from '../components/Map';
 
 export default function Sandbox() {
   const [orders, setOrders] = useState([{ id: 1 }])
   const [resolutions, setResolutions] = useState({});
   const { data: areas = [] } = useGetAreasQuery();
   const [adjudicateOrders] = useAdjudicateOrdersMutation();
+
+  const positions = orders.filter(order => order.nationality && order.unitType && order.area);
+  const areasById = areas.reduce((obj, area) => {
+    obj[area.id] = area.name;
+    return obj;
+  }, {});
 
   const sortedAreas = sortBy(areas, 'name');
 
@@ -23,7 +30,6 @@ export default function Sandbox() {
       resolutions[adjudication.id] = adjudication.resolution;
       return resolutions;
     }, {});
-    console.log(resolutionsById);
     setResolutions(resolutionsById);
   }
 
@@ -41,7 +47,8 @@ export default function Sandbox() {
           />
         ))}
         <Button onClick={() => setOrders([...orders, { id: orders.length + 1 }])} text="Add Order" />
-        <Button className="mt-6" onClick={submitOrders} text="Submit Orders" />
+        <Button className="my-6" onClick={submitOrders} text="Submit Orders" />
+        <Map positions={positions} areasById={areasById} />
       </div>
     </div>
   );
