@@ -588,7 +588,7 @@ describe 'AdjudicationService' do
 
       subject.new(orders).adjudicate
       expect(trieste_order.resolution).to eq(Order::FAILED)
-      expect(vienna_order.resolution).to eq(Order::SUCCEEDED)
+      expect(vienna_order.resolution).to eq(Order::FAILED)
       expect(venice_order.resolution).to eq(Order::FAILED)
       expect(apulia_order.resolution).to eq(Order::FAILED)
     end
@@ -608,7 +608,7 @@ describe 'AdjudicationService' do
 
       subject.new(orders).adjudicate
       expect(trieste_order.resolution).to eq(Order::FAILED)
-      expect(vienna_order.resolution).to eq(Order::SUCCEEDED)
+      expect(vienna_order.resolution).to eq(Order::FAILED)
       expect(venice_order.resolution).to eq(Order::SUCCEEDED)
       expect(tyrolia_order.resolution).to eq(Order::SUCCEEDED)
       expect(adriatic_order.resolution).to eq(Order::SUCCEEDED)
@@ -884,7 +884,7 @@ describe 'AdjudicationService' do
       subject.new(orders).adjudicate
       expect(berlin_order.resolution).to eq(Order::FAILED)
       expect(kiel_order.resolution).to eq(Order::FAILED)
-      expect(munich_order.resolution).to eq(Order::SUCCEEDED)
+      expect(munich_order.resolution).to eq(Order::FAILED)
     end
 
     specify 'E.3. TEST CASE, NO HELP IN DISLODGING OWN UNIT' do
@@ -898,7 +898,7 @@ describe 'AdjudicationService' do
 
       subject.new(orders).adjudicate
       expect(berlin_order.resolution).to eq(Order::FAILED)
-      expect(munich_order.resolution).to eq(Order::SUCCEEDED)
+      expect(munich_order.resolution).to eq(Order::FAILED)
       expect(kiel_order.resolution).to eq(Order::FAILED)
     end
 
@@ -1010,11 +1010,119 @@ describe 'AdjudicationService' do
       expect(helgoland_order.resolution).to eq(Order::SUCCEEDED)
       expect(north_sea_order.resolution).to eq(Order::FAILED)
       expect(belgium_order.resolution).to eq(Order::SUCCEEDED)
-      expect(english_channel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(english_channel_order.resolution).to eq(Order::FAILED)
       expect(kiel_order.resolution).to eq(Order::SUCCEEDED)
       expect(ruhr_order.resolution).to eq(Order::FAILED)
     end
 
-    specify 'E.7. TEST CASE, NO SELF DISLODGEMENT WITH BELEAGUERED GARRISON'
+    specify 'E.7. TEST CASE, NO SELF DISLODGEMENT WITH BELEAGUERED GARRISON' do
+      north_sea_fleet = build_position(nationality: Position::ENGLAND, area: 'North Sea', unit_type: Position::FLEET)
+      north_sea_order = build_order(position: north_sea_fleet, order_type: Order::HOLD)
+      yorkshire_fleet = build_position(nationality: Position::ENGLAND, area: 'Yorkshire', unit_type: Position::FLEET)
+      yorkshire_order = build_order(position: yorkshire_fleet, order_type: Order::SUPPORT, area_from: 'Norway', area_to: 'North Sea')
+
+      holland_fleet = build_position(nationality: Position::GERMANY, area: 'Holland', unit_type: Position::FLEET)
+      holland_order = build_order(position: holland_fleet, order_type: Order::SUPPORT, area_from: 'Heligoland Bight', area_to: 'North Sea')
+      heligoland_fleet = build_position(nationality: Position::GERMANY, area: 'Heligoland Bight', unit_type: Position::FLEET)
+      heligoland_order = build_order(position: heligoland_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+
+      skagerrak_fleet = build_position(nationality: Position::RUSSIA, area: 'Skagerrak', unit_type: Position::FLEET)
+      skagerrak_order = build_order(position: skagerrak_fleet, order_type: Order::SUPPORT, area_from: 'Norway', area_to: 'North Sea')
+      norway_fleet = build_position(nationality: Position::RUSSIA, area: 'Norway', unit_type: Position::FLEET)
+      norway_order = build_order(position: norway_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+
+      orders = [north_sea_order, yorkshire_order, holland_order, heligoland_order, skagerrak_order, norway_order]
+
+      subject.new(orders).adjudicate
+      expect(north_sea_order.resolution).to eq(Order::SUCCEEDED)
+      expect(yorkshire_order.resolution).to eq(Order::FAILED)
+      expect(holland_order.resolution).to eq(Order::SUCCEEDED)
+      expect(heligoland_order.resolution).to eq(Order::FAILED)
+      expect(skagerrak_order.resolution).to eq(Order::SUCCEEDED)
+      expect(norway_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'E.8. TEST CASE, NO SELF DISLODGEMENT WITH BELEAGUERED GARRISON AND HEAD TO HEAD BATTLE' do
+      north_sea_fleet = build_position(nationality: Position::ENGLAND, area: 'North Sea', unit_type: Position::FLEET)
+      north_sea_order = build_order(position: north_sea_fleet, order_type: Order::MOVE, area_to: 'Norway')
+      yorkshire_fleet = build_position(nationality: Position::ENGLAND, area: 'Yorkshire', unit_type: Position::FLEET)
+      yorkshire_order = build_order(position: yorkshire_fleet, order_type: Order::SUPPORT, area_from: 'Norway', area_to: 'North Sea')
+
+      holland_fleet = build_position(nationality: Position::GERMANY, area: 'Holland', unit_type: Position::FLEET)
+      holland_order = build_order(position: holland_fleet, order_type: Order::SUPPORT, area_from: 'Heligoland Bight', area_to: 'North Sea')
+      heligoland_fleet = build_position(nationality: Position::GERMANY, area: 'Heligoland Bight', unit_type: Position::FLEET)
+      heligoland_order = build_order(position: heligoland_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+
+      skagerrak_fleet = build_position(nationality: Position::RUSSIA, area: 'Skagerrak', unit_type: Position::FLEET)
+      skagerrak_order = build_order(position: skagerrak_fleet, order_type: Order::SUPPORT, area_from: 'Norway', area_to: 'North Sea')
+      norway_fleet = build_position(nationality: Position::RUSSIA, area: 'Norway', unit_type: Position::FLEET)
+      norway_order = build_order(position: norway_fleet, order_type: Order::MOVE, area_to: 'North Sea')
+
+      orders = [north_sea_order, yorkshire_order, holland_order, heligoland_order, skagerrak_order, norway_order]
+
+      subject.new(orders).adjudicate
+      expect(north_sea_order.resolution).to eq(Order::FAILED)
+      expect(yorkshire_order.resolution).to eq(Order::FAILED)
+      expect(holland_order.resolution).to eq(Order::SUCCEEDED)
+      expect(heligoland_order.resolution).to eq(Order::FAILED)
+      expect(skagerrak_order.resolution).to eq(Order::SUCCEEDED)
+      expect(norway_order.resolution).to eq(Order::FAILED)
+    end
+
+    # TODO: finish E rules
+
+    specify 'F.1. TEST CASE, NO CONVOY IN COASTAL AREAS' do
+      greece_army = build_position(nationality: Position::TURKEY, area: 'Greece', unit_type: Position::ARMY)
+      greece_order = build_order(position: greece_army, order_type: Order::MOVE, area_to: 'Sevastopol')
+      aegean_sea_fleet = build_position(nationality: Position::TURKEY, area: 'Aegean Sea', unit_type: Position::FLEET)
+      aegean_sea_order = build_order(position: aegean_sea_fleet, order_type: Order::CONVOY, area_from: 'Greece', area_to: 'Sevastopol')
+      constantinople_fleet = build_position(nationality: Position::TURKEY, area: 'Constantinople', unit_type: Position::FLEET)
+      constantinople_order = build_order(position: constantinople_fleet, order_type: Order::CONVOY, area_from: 'Greece', area_to: 'Sevastopol')
+      black_sea_fleet = build_position(nationality: Position::TURKEY, area: 'Black Sea', unit_type: Position::FLEET)
+      black_sea_order = build_order(position: black_sea_fleet, order_type: Order::CONVOY, area_from: 'Greece', area_to: 'Sevastopol')
+
+      orders = [greece_order, aegean_sea_order, constantinople_order, black_sea_order]
+
+      subject.new(orders).adjudicate
+      expect(greece_order.resolution).to eq(Order::FAILED)
+      expect(aegean_sea_order.resolution).to eq(Order::SUCCEEDED)
+      expect(constantinople_order.resolution).to eq(Order::FAILED)
+      expect(black_sea_order.resolution).to eq(Order::SUCCEEDED)
+    end
+
+    specify 'F.2. TEST CASE, AN ARMY BEING CONVOYED CAN BOUNCE AS NORMAL' do
+      english_channel_fleet = build_position(nationality: Position::ENGLAND, area: 'English Channel', unit_type: Position::FLEET)
+      english_channel_order = build_order(position: english_channel_fleet, order_type: Order::CONVOY, area_from: 'London', area_to: 'Brest')
+      london_army = build_position(nationality: Position::ENGLAND, area: 'London', unit_type: Position::ARMY)
+      london_order = build_order(position: london_army, order_type: Order::MOVE, area_to: 'Brest')
+      paris_army = build_position(nationality: Position::FRANCE, area: 'Paris', unit_type: Position::ARMY)
+      paris_order = build_order(position: paris_army, order_type: Order::MOVE, area_to: 'Brest')
+
+      orders = [english_channel_order, london_order, paris_order]
+
+      subject.new(orders).adjudicate
+      expect(english_channel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(london_order.resolution).to eq(Order::FAILED)
+      expect(paris_order.resolution).to eq(Order::FAILED)
+    end
+
+    specify 'F.3. TEST CASE, AN ARMY BEING CONVOYED CAN RECEIVE SUPPORT' do
+      english_channel_fleet = build_position(nationality: Position::ENGLAND, area: 'English Channel', unit_type: Position::FLEET)
+      english_channel_order = build_order(position: english_channel_fleet, order_type: Order::CONVOY, area_from: 'London', area_to: 'Brest')
+      london_army = build_position(nationality: Position::ENGLAND, area: 'London', unit_type: Position::ARMY)
+      london_order = build_order(position: london_army, order_type: Order::MOVE, area_to: 'Brest')
+      mid_atlantic_fleet = build_position(nationality: Position::ENGLAND, area: 'Mid Atlantic Ocean', unit_type: Position::FLEET)
+      mid_atlantic_order = build_order(position: mid_atlantic_fleet, order_type: Order::SUPPORT, area_from: 'London', area_to: 'Brest')
+      paris_army = build_position(nationality: Position::FRANCE, area: 'Paris', unit_type: Position::ARMY)
+      paris_order = build_order(position: paris_army, order_type: Order::MOVE, area_to: 'Brest')
+
+      orders = [english_channel_order, london_order, mid_atlantic_order, paris_order]
+
+      subject.new(orders).adjudicate
+      expect(english_channel_order.resolution).to eq(Order::SUCCEEDED)
+      expect(london_order.resolution).to eq(Order::SUCCEEDED)
+      expect(mid_atlantic_order.resolution).to eq(Order::SUCCEEDED)
+      expect(paris_order.resolution).to eq(Order::FAILED)
+    end
   end
 end

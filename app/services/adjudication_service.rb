@@ -42,6 +42,14 @@ class AdjudicationService
       end
     end
 
+    # if any orders represent supporting a move that dislodges its own unit, retry adjudication with that order failing
+    invalid_orders = @orders.select { |o| self.dislodges_own_unit?(o) }
+    if invalid_orders.present?
+      @orders.each { |o| o.resolution = nil }
+      invalid_orders.each { |o| o.resolution = Order::FAILED }
+      self.adjudicate
+    end
+
     raise 'Adjudication did not converge' if @orders.any?(&:unresolved?)
   end
 
@@ -79,6 +87,11 @@ class AdjudicationService
 
     # can't convoy or move a unit to the same location
     @orders.select { |order| (order.convoy? || order.move?) && (order.area_from == order.area_to) }.each do |order|
+      order.resolution = Order::FAILED
+    end
+
+    # can't convoy from land
+    @orders.select { |order| order.convoy? && (order.position.area.area_type != Area::SEA) }.each do |order|
       order.resolution = Order::FAILED
     end
   end
@@ -175,10 +188,6 @@ class AdjudicationService
         if (target_nationality != order.position.nationality)
           adjusted_attack_strength = max_attack_strength
 
-          # reduce attack strength by target nationality's support because they cannot assist in dislodging their own unit
-          if (target_originating_order.present? && (!target_originating_order.move? || (target_originating_order.move? && target_originating_order.failed?)))
-            adjusted_attack_strength -= self.support_reduction(order, target_originating_order)
-          end
           return (adjusted_attack_strength > target_resist_strength.last) ? Order::SUCCEEDED : Order::FAILED
         end
 
@@ -244,6 +253,9 @@ class AdjudicationService
     # hold succeeds if its minimum strength is greater or equal than maximum attack strength
     return Order::SUCCEEDED if attack_hash.keys.all? { |strength_array| strength_array.max <= area_hold_strength.first }
 
+    # hold succeeds if all attacking orders fail
+    return Order::SUCCEEDED if attack_hash.values.flatten.all?(&:failed?)
+
     nil
   end
 
@@ -301,6 +313,17 @@ class AdjudicationService
     @support_hash[attacking_order]&.select do |support_order|
       support_order.succeeded? && (support_order.position.nationality == originating_order.position.nationality)
     end&.length || 0
+  end
+
+  def dislodges_own_unit?(order)
+    return false unless order.support?
+    return false unless (order.resolution == Order::SUCCEEDED)
+    return false if (order.area_from == order.area_to)
+    target_order = @orders.find { |o| o.position.area == order.area_to }
+    return false if target_order.nil?
+    return false if (target_order.position.nationality != order.position.nationality)
+    return false if (target_order.move? && target_order.resolution == Order::SUCCEEDED)
+    true
   end
 
   private
