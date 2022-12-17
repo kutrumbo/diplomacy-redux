@@ -3,6 +3,11 @@ import classNames from 'classnames';
 import { NATIONALITY_COLORS, UNIT_TYPES } from '../const';
 import { areaPositionClassName } from '../utils';
 
+export const UNIT_SIZES = {
+  SMALL: 'small',
+  MEDIUM: 'medium',
+};
+
 function Army({ className }) {
   return (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -19,11 +24,15 @@ function Fleet({ className }) {
   );
 };
 
-export default function Unit({ area, areasById={areasById}, nationality, unitType }) {
+export default function Unit({ area, areasById={areasById}, nationality, size, unitType }) {
   const clazz = classNames(
     areaPositionClassName(areasById[area]),
     NATIONALITY_COLORS[nationality],
-    'absolute w-10 h-10 drop-shadow-lg',
+    'absolute drop-shadow-lg',
+    {
+      'w-8 h-8': size === UNIT_SIZES.SMALL,
+      'w-10 h-10': size !== UNIT_SIZES.SMALL,
+    },
   );
 
   return (unitType === UNIT_TYPES.ARMY) ? <Army className={clazz} /> : <Fleet className={clazz} />;

@@ -2,12 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
-
-@layer components {
-  .btn-primary {
-    @apply py-2 px-4 bg-blue-200;
+@layer base {
+  /* reset default Tailwind select styes */
+  select {
+    background-image: none;
+    padding-right: 12px;
+    -webkit-appearance: none;
+    -moz-appearance: textfield !important;
   }
 }
-
-*/

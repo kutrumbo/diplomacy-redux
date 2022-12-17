@@ -29,3 +29,8 @@ export const UNIT_TYPES = {
   ARMY: 'army',
   FLEET: 'fleet',
 };
+
+export const RESOLUTIONS = {
+  SUCCESS: 'succeeded',
+  FAIL: 'failed',
+};

@@ -25,6 +25,7 @@ export default function Sandbox() {
   };
 
   const updateOrder = (index, order) => {
+    setResolutions([]);
     orders[index] = order;
     setOrders([...orders]);
   };
@@ -39,8 +40,8 @@ export default function Sandbox() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <div className="min-h-screen mx-36 p-12 bg-white shadow-xl">
+    <div className="flex min-h-screen">
+      <div className="w-[45%] p-8">
         <h1 className="text-xl mb-8">Sandbox</h1>
         {orders.map((order, index) => (
           <OrderInput
@@ -53,8 +54,12 @@ export default function Sandbox() {
             updateOrder={partial(updateOrder, index)}
           />
         ))}
-        <Button onClick={() => setOrders([...orders, { id: orders.length + 1 }])} text="Add Order" neutral />
-        <Button className="my-6" onClick={submitOrders} text="Submit Orders" />
+        <Button onClick={() => setOrders([...orders, { id: orders.length + 1 }])} text="Add Order" neutral small />
+        <div className="flex w-full justify-end my-6">
+          <Button onClick={submitOrders} text="Submit Orders" />
+        </div>
+      </div>
+      <div className="w-[55%]">
         <Map positions={positions} areasById={areasById} />
       </div>
     </div>
