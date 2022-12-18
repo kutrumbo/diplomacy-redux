@@ -3,6 +3,8 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root 'application#index'
+  get '/sandbox', to: 'application#index'
+  get '/games/:id', to: 'application#index'
 
   namespace :api do
     resources :areas, only: [:index]
