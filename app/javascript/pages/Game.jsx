@@ -15,7 +15,6 @@ export default function Game() {
 
   const positions = game.positions;
   const areasById = formatAreasById(areas);
-  console.log(positions);
 
   return (
     <div className="flex min-h-screen">

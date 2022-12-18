@@ -28,6 +28,7 @@ class Order < ApplicationRecord
   ].freeze
 
   belongs_to :position
+  has_one :turn, through: :position
   belongs_to :area_from, class_name: 'Area', optional: true
   belongs_to :area_to, class_name: 'Area', optional: true
   belongs_to :coast_from, class_name: 'Coast', optional: true
