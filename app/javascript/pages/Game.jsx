@@ -1,17 +1,21 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useGetGameQuery } from '../api';
+import { useGetAreasQuery, useGetGameQuery } from '../api';
+import{ formatAreasById } from '../utils';
 import Map from '../components/Map';
 
 export default function Game() {
   const { gameId } = useParams()
-  const { data: game, isLoading } = useGetGameQuery(gameId);
-  const positions = [];
-  const areasById = {};
+  const { data: game, isLoading: gameIsLoading } = useGetGameQuery(gameId);
+  const { data: areas, isLoading: areasAreLoading } = useGetAreasQuery();
 
-  if (isLoading) {
+  if (gameIsLoading || areasAreLoading) {
     return <div>Loading</div>;
   }
+
+  const positions = game.positions;
+  const areasById = formatAreasById(areas);
+  console.log(positions);
 
   return (
     <div className="flex min-h-screen">

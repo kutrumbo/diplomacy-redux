@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { partial, sortBy } from 'lodash';
 import { useAdjudicateOrdersMutation, useGetAreasQuery } from '../api';
+import { formatAreasById } from '../utils';
 import Button from '../components/Button';
 import OrderInput from '../components/OrderInput';
 import Map from '../components/Map';
@@ -11,11 +12,8 @@ export default function Sandbox() {
   const { data: areas = [] } = useGetAreasQuery();
   const [adjudicateOrders] = useAdjudicateOrdersMutation();
 
-  const positions = orders.filter(order => order.nationality && order.unitType && order.area);
-  const areasById = areas.reduce((obj, area) => {
-    obj[area.id] = area.name;
-    return obj;
-  }, {});
+  const positions = orders.filter(order => order.nationality && order.unitType && order.areaId);
+  const areasById = formatAreasById(areas);
 
   const sortedAreas = sortBy(areas, 'name');
 

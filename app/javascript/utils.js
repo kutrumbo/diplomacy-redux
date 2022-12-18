@@ -27,6 +27,13 @@ export const snakeCaseKeys = (input, excludeKeys = []) => deepMapKeys(input, key
 // necessary because esbuild is not properly pre-pending asset src strings with /assets
 export const fixAssetSrc = (srcString) => srcString.replace('./', '/assets/');
 
+export const formatAreasById = (areas) => {
+  return areas.reduce((obj, area) => {
+    obj[area.id] = area.name;
+    return obj;
+  }, {});
+};
+
 const AREA_COORDS = {
   adriatic_sea: 'top-[76%] left-[50%]',
   aegean_sea: 'top-[91%] left-[67%]',

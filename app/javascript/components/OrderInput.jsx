@@ -24,11 +24,11 @@ export default function OrderInput({ areas, order, orders, resolution, removeOrd
       updatedOrder.areaTo = null;
     }
     if (updatedOrder.orderType === ORDER_TYPES.HOLD) {
-      updatedOrder.areaFrom = updatedOrder.area;
-      updatedOrder.areaTo = updatedOrder.area;
+      updatedOrder.areaFrom = updatedOrder.areaId;
+      updatedOrder.areaTo = updatedOrder.areaId;
     }
     if (updatedOrder.orderType === ORDER_TYPES.MOVE) {
-      updatedOrder.areaFrom = updatedOrder.area;
+      updatedOrder.areaFrom = updatedOrder.areaId;
     }
     updateOrder(updatedOrder);
   };
@@ -43,8 +43,8 @@ export default function OrderInput({ areas, order, orders, resolution, removeOrd
         {!order.unitType && <option value="0" disabled>Unit Type</option>}
         {Object.values(UNIT_TYPES).map(unitType => <option key={unitType} value={unitType}>{capitalize(unitType)}</option>)}
       </Select>
-      <Select className="w-24" name="area" value={order.area || '0'} onChange={onChange}>
-        {!order.area && <option value="0" disabled>Area</option>}
+      <Select className="w-24" name="areaId" value={order.areaId || '0'} onChange={onChange}>
+        {!order.areaId && <option value="0" disabled>Area</option>}
         {Object.values(areas).map(area => <option key={area.id} value={area.id}>{area.name}</option>)}
       </Select>
       <Select className="w-20" name="orderType" value={order.orderType || '0'} onChange={onChange}>

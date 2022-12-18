@@ -24,9 +24,9 @@ function Fleet({ className }) {
   );
 };
 
-export default function Unit({ area, areasById={areasById}, nationality, size, unitType }) {
+export default function Unit({ areaId, areasById={areasById}, nationality, size, unitType }) {
   const clazz = classNames(
-    areaPositionClassName(areasById[area]),
+    areaPositionClassName(areasById[areaId]),
     NATIONALITY_COLORS[nationality],
     'absolute drop-shadow-lg',
     {

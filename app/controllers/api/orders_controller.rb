@@ -6,7 +6,7 @@ module Api
           id: order_hash[:id],
           position: Position.new(
             nationality: order_hash[:nationality],
-            area_id: order_hash[:area],
+            area_id: order_hash[:area_id],
             unit_type: order_hash[:unit_type],
           ),
           order_type: order_hash[:order_type],
