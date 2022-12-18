@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_05_16_055833) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_18_074157) do
   create_table "areas", force: :cascade do |t|
     t.string "name", null: false
     t.string "area_type", null: false
@@ -41,9 +41,15 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_16_055833) do
     t.index ["area_id"], name: "index_coasts_on_area_id"
   end
 
+  create_table "games", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "orders", force: :cascade do |t|
     t.integer "position_id", null: false
-    t.string "order_type", null: false
+    t.string "order_type"
     t.integer "area_from_id"
     t.integer "area_to_id"
     t.integer "coast_from_id"
@@ -60,13 +66,24 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_16_055833) do
 
   create_table "positions", force: :cascade do |t|
     t.string "nationality", null: false
-    t.string "unit_type", null: false
+    t.string "unit_type"
     t.integer "area_id", null: false
     t.integer "coast_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "turn_id", null: false
     t.index ["area_id"], name: "index_positions_on_area_id"
     t.index ["coast_id"], name: "index_positions_on_coast_id"
+    t.index ["turn_id"], name: "index_positions_on_turn_id"
+  end
+
+  create_table "turns", force: :cascade do |t|
+    t.string "type", null: false
+    t.integer "number", null: false
+    t.integer "game_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_turns_on_game_id"
   end
 
   add_foreign_key "borders", "areas"
@@ -80,4 +97,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_05_16_055833) do
   add_foreign_key "orders", "positions"
   add_foreign_key "positions", "areas"
   add_foreign_key "positions", "coasts"
+  add_foreign_key "positions", "turns"
+  add_foreign_key "turns", "games"
 end

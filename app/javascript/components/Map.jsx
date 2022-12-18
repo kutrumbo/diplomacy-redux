@@ -16,7 +16,6 @@ export default function Map({ areasById, className = '', positions }) {
   const ref = useRef(null);
   const [width, setWidth] = useState(0);
   const getWidth = () => ref.current.offsetWidth;
-  console.log(width);
 
   useLayoutEffect(() => {
     const handleResize = () => {

@@ -26,7 +26,11 @@ export const api = createApi({
       query: () => 'areas',
       transformResponse: response => camelCaseKeys(response),
     }),
+    getGame: builder.query({
+      query: (id) => `games/${id}`,
+      transformResponse: response => camelCaseKeys(response),
+    }),
   }),
 });
 
-export const { useAdjudicateOrdersMutation, useGetAreasQuery } = api;
+export const { useAdjudicateOrdersMutation, useGetAreasQuery, useGetGameQuery } = api;

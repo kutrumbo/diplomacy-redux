@@ -25,7 +25,7 @@ export const camelCaseKeys = (input, excludeKeys = []) => deepMapKeys(input, key
 export const snakeCaseKeys = (input, excludeKeys = []) => deepMapKeys(input, key => snakeCase(key), excludeKeys);
 
 // necessary because esbuild is not properly pre-pending asset src strings with /assets
-export const fixAssetSrc = (srcString) => srcString.replace('./', './assets/');
+export const fixAssetSrc = (srcString) => srcString.replace('./', '/assets/');
 
 const AREA_COORDS = {
   adriatic_sea: 'top-[76%] left-[50%]',

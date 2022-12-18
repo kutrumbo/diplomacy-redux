@@ -17,7 +17,7 @@ const router = createBrowserRouter([
     element: <Sandbox />,
   },
   {
-    path: '/games/:id',
+    path: '/games/:gameId',
     element: <Game />,
   }
 ]);
