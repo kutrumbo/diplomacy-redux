@@ -19,8 +19,14 @@ export default function Sandbox() {
 
   const sortedAreas = sortBy(areas, 'name');
 
+  const addOrder = () => {
+    setResolutions([]);
+    setOrders([...orders, { id: orders.length + 1 }]);
+  };
+
   const removeOrder = (index) => {
-    orders.splice(index, 1)
+    setResolutions([]);
+    orders.splice(index, 1);
     setOrders([...orders]);
   };
 
@@ -54,7 +60,7 @@ export default function Sandbox() {
             updateOrder={partial(updateOrder, index)}
           />
         ))}
-        <Button onClick={() => setOrders([...orders, { id: orders.length + 1 }])} text="Add Order" neutral small />
+        <Button onClick={addOrder} text="Add Order" neutral small />
         <div className="flex w-full justify-end my-6">
           <Button onClick={submitOrders} text="Submit Orders" />
         </div>
