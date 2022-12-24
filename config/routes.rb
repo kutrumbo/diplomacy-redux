@@ -8,7 +8,9 @@ Rails.application.routes.draw do
 
   namespace :api do
     resources :areas, only: [:index]
-    resources :games, only: [:show]
+    resources :games, only: [:show] do
+      put 'orders', to: 'games#update_orders'
+    end
     resources :orders, only: [] do
       post 'adjudicate', on: :collection
     end

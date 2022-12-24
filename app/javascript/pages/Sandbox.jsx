@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { partial, sortBy } from 'lodash';
+import { partial } from 'lodash';
 import { useAdjudicateOrdersMutation, useGetAreasQuery } from '../api';
-import { formatAreasById } from '../utils';
+import { groupById } from '../utils';
 import Button from '../components/Button';
-import OrderInput from '../components/OrderInput';
+import SandboxOrderInput from '../components/SandboxOrderInput';
 import Map from '../components/Map';
 
 export default function Sandbox() {
@@ -13,9 +13,7 @@ export default function Sandbox() {
   const [adjudicateOrders] = useAdjudicateOrdersMutation();
 
   const positions = orders.filter(order => order.nationality && order.unitType && order.areaId);
-  const areasById = formatAreasById(areas);
-
-  const sortedAreas = sortBy(areas, 'name');
+  const areasById = groupById(areas, 'name');
 
   const addOrder = () => {
     setResolutions([]);
@@ -48,9 +46,9 @@ export default function Sandbox() {
       <div className="w-[45%] p-8">
         <h1 className="text-xl mb-8">Sandbox</h1>
         {orders.map((order, index) => (
-          <OrderInput
+          <SandboxOrderInput
             key={index}
-            areas={sortedAreas}
+            areas={areas}
             order={order}
             orders={orders}
             removeOrder={partial(removeOrder, index)}

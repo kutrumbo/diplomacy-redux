@@ -32,6 +32,13 @@ export const formatAreasById = (areas) => {
     obj[area.id] = area.name;
     return obj;
   }, {});
+}
+
+export const groupById = (arr, valueField = null) => {
+  return arr.reduce((result, obj) => {
+    result[obj.id] = valueField ? obj[valueField] : obj;
+    return result;
+  }, {});
 };
 
 const AREA_COORDS = {

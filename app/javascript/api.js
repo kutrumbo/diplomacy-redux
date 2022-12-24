@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { pick, sortBy } from 'lodash';
 import { camelCaseKeys, snakeCaseKeys } from './utils';
 
 export const api = createApi({
@@ -13,6 +14,7 @@ export const api = createApi({
       return headers;
     },
   }),
+  tagTypes: ['Game'],
   endpoints: (builder) => ({
     adjudicateOrders: builder.mutation({
       query: orders => ({
@@ -24,13 +26,23 @@ export const api = createApi({
     }),
     getAreas: builder.query({
       query: () => 'areas',
-      transformResponse: response => camelCaseKeys(response),
+      transformResponse: response => sortBy(camelCaseKeys(response), 'name'),
     }),
     getGame: builder.query({
       query: (id) => `games/${id}`,
       transformResponse: response => camelCaseKeys(response),
+      providesTags: ['Game'],
+    }),
+    updateOrders: builder.mutation({
+      query: ({ gameId, orders }) => ({
+        url: `games/${gameId}/orders`,
+        method: 'PUT',
+        body: snakeCaseKeys({ orders }),
+      }),
+      transformResponse: response => camelCaseKeys(response),
+      invalidatesTags: ['Game'],
     }),
   }),
 });
 
-export const { useAdjudicateOrdersMutation, useGetAreasQuery, useGetGameQuery } = api;
+export const { useAdjudicateOrdersMutation, useGetAreasQuery, useGetGameQuery, useUpdateOrdersMutation } = api;

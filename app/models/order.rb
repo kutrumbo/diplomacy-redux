@@ -49,6 +49,10 @@ class Order < ApplicationRecord
     end
   end
 
+  def complete?
+    self.order_type.present? && self.area_from_id.present? && self.area_to_id.present?
+  end
+
   def resolved?
     self.resolution.present?
   end
