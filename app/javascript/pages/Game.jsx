@@ -9,9 +9,10 @@ import Map from '../components/Map';
 
 export default function Game() {
   const { gameId } = useParams()
-  const { data: game, isLoading: gameIsLoading, refetch: refetchGame } = useGetGameQuery(gameId);
+  const { data: game, isLoading: gameIsLoading } = useGetGameQuery(gameId);
   const { data: areas, isLoading: areasAreLoading } = useGetAreasQuery();
-  const [orders, setOrders] = useState([])
+  const [orders, setOrders] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [syncOrders] = useUpdateOrdersMutation();
 
   useEffect(() => {
@@ -35,7 +36,9 @@ export default function Game() {
   };
 
   const submitOrders = async () => {
+    setIsSubmitting(true);
     const result = await syncOrders({ gameId: game.id, orders }).unwrap();
+    setIsSubmitting(false);
     console.log(result);
   }
 
@@ -55,7 +58,7 @@ export default function Game() {
           />
         ))}
         <div className="flex w-full justify-end my-6">
-          <Button onClick={submitOrders} text="Submit Orders" />
+          <Button isLoading={isSubmitting} onClick={submitOrders} text="Submit Orders" />
         </div>
       </div>
       <div className="w-[55%]">

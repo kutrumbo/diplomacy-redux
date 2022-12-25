@@ -1,7 +1,9 @@
 import React from 'react';
 import classNames from 'classnames';
+import { noop } from 'lodash';
+import { LoadingIndicator } from './icons';
 
-export default function Button({ className = '', danger, neutral, onClick, small, text }) {
+export default function Button({ className = '', danger, isLoading, neutral, onClick, small, text }) {
   const clazz = classNames(
     'block text-white rounded shadow',
     className,
@@ -15,6 +17,13 @@ export default function Button({ className = '', danger, neutral, onClick, small
   );
 
   return (
-    <button className={clazz} type="button" onClick={onClick}>{text}</button>
+    <button className={clazz} type="button" disabled={isLoading} onClick={isLoading ? noop : onClick}>
+      {isLoading ? (
+        <>
+          {text}
+          <LoadingIndicator className={`inline ml-2 ${small ? 'h-3' : 'h-4'}`} />
+        </>
+      ) : text}
+    </button>
   );
 }
