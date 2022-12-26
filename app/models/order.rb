@@ -37,6 +37,8 @@ class Order < ApplicationRecord
   validates_inclusion_of :resolution, in: RESOLUTIONS, allow_nil: true
   validates_inclusion_of :order_type, in: ORDER_TYPES, allow_nil: true
 
+  after_update { |order| TurnService.process_turn(order.turn) }
+
   RESOLUTIONS.each do |resolution|
     define_method("#{resolution}?") do
       self.resolution == resolution
@@ -49,7 +51,7 @@ class Order < ApplicationRecord
     end
   end
 
-  def complete?
+  def confirmed?
     self.order_type.present? && self.area_from_id.present? && self.area_to_id.present?
   end
 

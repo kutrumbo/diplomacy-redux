@@ -45,7 +45,8 @@ export default function Game() {
   return (
     <div className="flex min-h-screen">
       <div className="w-[45%] p-8">
-        <h1 className="text-xl mb-8">{game.name}</h1>
+        <h1 className="text-xl mb-8">Game: {game.name}</h1>
+        <h2 className="text-l mb-8">Turn: {game.turn.type}</h2>
         {orders.map((order, index) => (
           <OrderInput
             key={index}

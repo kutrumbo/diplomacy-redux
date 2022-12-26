@@ -1,5 +1,6 @@
 class AdjudicationService
   def initialize(orders)
+    # TODO: validate that orders are valid type based on turn type
     @orders = orders
     @positions = @orders.map(&:position)
     @support_hash = @orders.select(&:support?).group_by do |support_order|
