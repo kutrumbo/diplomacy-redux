@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_18_074157) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_26_211842) do
   create_table "areas", force: :cascade do |t|
     t.string "name", null: false
     t.string "area_type", null: false
@@ -64,6 +64,14 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_18_074157) do
     t.index ["position_id"], name: "index_orders_on_position_id"
   end
 
+  create_table "players", force: :cascade do |t|
+    t.string "nationality", null: false
+    t.integer "game_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["game_id"], name: "index_players_on_game_id"
+  end
+
   create_table "positions", force: :cascade do |t|
     t.string "nationality", null: false
     t.string "unit_type"
@@ -72,8 +80,11 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_18_074157) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "turn_id", null: false
+    t.boolean "dislodged", default: false, null: false
+    t.integer "player_id", null: false
     t.index ["area_id"], name: "index_positions_on_area_id"
     t.index ["coast_id"], name: "index_positions_on_coast_id"
+    t.index ["player_id"], name: "index_positions_on_player_id"
     t.index ["turn_id"], name: "index_positions_on_turn_id"
   end
 
@@ -95,8 +106,10 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_18_074157) do
   add_foreign_key "orders", "coasts", column: "coast_from_id"
   add_foreign_key "orders", "coasts", column: "coast_to_id"
   add_foreign_key "orders", "positions"
+  add_foreign_key "players", "games"
   add_foreign_key "positions", "areas"
   add_foreign_key "positions", "coasts"
+  add_foreign_key "positions", "players"
   add_foreign_key "positions", "turns"
   add_foreign_key "turns", "games"
 end
