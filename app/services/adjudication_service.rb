@@ -139,7 +139,7 @@ class AdjudicationService
     max_order_attack_strength = order_attack_strength.last
 
     target_originating_order = @orders.find { |o| o.position.area == order.area_to }
-    target_nationality = target_originating_order&.position&.nationality
+    target_nationality = target_originating_order&.position&.player&.nationality
 
     target_resist_strength = if target_originating_order.present?
       if [Order::HOLD, Order::CONVOY, Order::SUPPORT].include?(target_originating_order.order_type)
@@ -186,14 +186,14 @@ class AdjudicationService
 
       if all_support_resolved && (conclusively_max_strength_orders.length == 1) && (conclusively_max_strength_orders.first == order) && (max_attack_strength > target_resist_strength.last)
         # when not targeting area occupied by own unit
-        if (target_nationality != order.position.nationality)
+        if (target_nationality != order.position.player.nationality)
           adjusted_attack_strength = max_attack_strength
 
           return (adjusted_attack_strength > target_resist_strength.last) ? Order::SUCCEEDED : Order::FAILED
         end
 
         # when targeting an area occupied by your own unit
-        if target_originating_order.present? && (target_nationality == order.position.nationality)
+        if target_originating_order.present? && (target_nationality == order.position.player.nationality)
           # order fails if the target is of the same nationality and unit is not exiting position
           if (!target_originating_order.move? || (target_originating_order.move? && target_originating_order.failed?))
             return Order::FAILED
@@ -221,7 +221,7 @@ class AdjudicationService
     cutting_orders = potential_cutting_orders.reject do |cutting_order|
       (cutting_order.failed? && PathService.requires_convoy?(cutting_order.position.area, cutting_order.area_to)) ||
         (cutting_order.position.area == order.area_to) ||
-        (cutting_order.position.nationality === order.position.nationality)
+        (cutting_order.position.player.nationality === order.position.player.nationality)
     end
 
     return Order::FAILED if cutting_orders.present?
@@ -247,7 +247,7 @@ class AdjudicationService
 
         # hold fails if there is a single attacker with highest attack strength greater than hold
         # however hold succeeds if that attacker is of the same nationality
-        return (attacking_order.position.nationality != order.position.nationality) ? Order::FAILED : Order::SUCCEEDED
+        return (attacking_order.position.player.nationality != order.position.player.nationality) ? Order::FAILED : Order::SUCCEEDED
       end
     end
 
@@ -312,7 +312,7 @@ class AdjudicationService
 
   def support_reduction(attacking_order, originating_order)
     @support_hash[attacking_order]&.select do |support_order|
-      support_order.succeeded? && (support_order.position.nationality == originating_order.position.nationality)
+      support_order.succeeded? && (support_order.position.player.nationality == originating_order.position.player.nationality)
     end&.length || 0
   end
 
@@ -322,7 +322,7 @@ class AdjudicationService
     return false if (order.area_from == order.area_to)
     target_order = @orders.find { |o| o.position.area == order.area_to }
     return false if target_order.nil?
-    return false if (target_order.position.nationality != order.position.nationality)
+    return false if (target_order.position.player.nationality != order.position.player.nationality)
     return false if (target_order.move? && target_order.resolution == Order::SUCCEEDED)
     true
   end

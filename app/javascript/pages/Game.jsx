@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { capitalize, partial } from 'lodash';
+import { startCase, capitalize, partial } from 'lodash';
 import { useGetAreasQuery, useGetGameQuery, useUpdateOrdersMutation } from '../api';
 import{ groupById } from '../utils';
 import Button from '../components/Button';
@@ -16,6 +16,7 @@ export default function Game() {
   const [syncOrders] = useUpdateOrdersMutation();
 
   useEffect(() => {
+    console.log(game);
     if (game) {
       setOrders(game.orders);
     }
@@ -25,7 +26,7 @@ export default function Game() {
     return <div>Loading</div>;
   }
 
-  const { players, positions } = game;
+  const { players, positions, turn } = game;
   const playersById = groupById(players);
   const positionsById = groupById(positions);
   const areasById = groupById(areas, 'name');
@@ -47,7 +48,7 @@ export default function Game() {
     <div className="flex min-h-screen">
       <div className="w-[45%] p-8">
         <h1 className="text-xl mb-8">Game: {game.name}</h1>
-        <h2 className="text-l mb-8">Turn: {capitalize(game.turn.type)} {game.year}</h2>
+        <h2 className="text-l mb-8">Turn: {startCase(game.turn.type)} {game.year}</h2>
         {orders.map((order, index) => (
           <OrderInput
             key={index}
@@ -56,7 +57,7 @@ export default function Game() {
             order={order}
             player={playersById[positionsById[order.positionId].playerId]}
             position={positionsById[order.positionId]}
-            resolution={[]}
+            turn={turn}
             updateOrder={partial(updateOrder, index)}
           />
         ))}

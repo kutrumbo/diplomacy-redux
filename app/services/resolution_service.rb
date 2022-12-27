@@ -28,8 +28,8 @@ module ResolutionService
       )
     end
 
-    # process non-move orders
-    previous_turn.orders.non_move.each do |order|
+    # process non-move and failed move orders
+    previous_turn.orders.non_move.or(previous_turn.orders.move.failed).each do |order|
       new_position = order.position.dup
 
       # check to see if they should be dislodged by seeing if there were any successful attacks against
@@ -75,6 +75,7 @@ module ResolutionService
   def self.process_build_turn(previous_turn, next_turn)
     # TODO:
     previous_turn.positions.each do |position|
+      new_position = position.dup
       new_position.update!(turn: next_turn)
     end
   end

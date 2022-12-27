@@ -1,26 +1,22 @@
 import React from 'react';
-import { capitalize, without } from 'lodash';
-import { ORDER_TYPES, RESOLUTIONS, UNIT_TYPES } from '../const';
-import Badge from './Badge';
+import { capitalize } from 'lodash';
+import { ORDER_TYPES, UNIT_TYPES } from '../const';
 import Select from './Select';
 
-const ORDER_VALUES = Object.values(ORDER_TYPES);
+const allowableOrderTypes = (turn, unitType = null) => {
+  if (['fall', 'spring'].includes(turn.type)) {
+    return (unitType === UNIT_TYPES.FLEET) ? [ORDER_TYPES.HOLD, ORDER_TYPES.MOVE, ORDER_TYPES.SUPPORT, ORDER_TYPES.CONVOY] : [ORDER_TYPES.HOLD, ORDER_TYPES.MOVE, ORDER_TYPES.SUPPORT];
+  } else if (['fall_retreat', 'spring_retreat'].includes(turn.type)) {
+    return [ORDER_TYPES.DISBAND, ORDER_TYPES.RETREAT];
+  } else if (turn.type === 'winter') {
+    // TODO: only allow building appropriate type based on area
+    return [ORDER_TYPES.BUILD_ARMY, ORDER_TYPES.BUILD_FLEET];
+  } else {
+    throw new Error(`Unsupported turn type: ${turn.type}`);
+  }
+};
 
-function ResolutionBadge({ resolution }) {
-  return (
-    <Badge
-      success={resolution === RESOLUTIONS.SUCCESS}
-      danger={resolution === RESOLUTIONS.FAIL}
-      text={resolution}
-    />
-  );
-}
-
-const allowableOrderTypes = (unitType) => {
-  return (unitType === UNIT_TYPES.FLEET) ? ORDER_VALUES : without(ORDER_VALUES, ORDER_TYPES.CONVOY);
-}
-
-export default function OrderInput({ areas, areasById, order, player, position, resolution, updateOrder }) {
+export default function OrderInput({ areas, areasById, order, player, position, turn, updateOrder }) {
 
   const onChange = (event) => {
     const updatedOrder = { ...order, [event.target.name]: event.target.value };
@@ -51,7 +47,7 @@ export default function OrderInput({ areas, areasById, order, player, position, 
       </div>
       <Select className="w-20" name="orderType" value={order.orderType || '0'} onChange={onChange}>
         {!order.orderType && <option value="0" disabled>Order</option>}
-        {allowableOrderTypes(position.unitType).map(orderType => (
+        {allowableOrderTypes(turn, position.unitType).map(orderType => (
           <option key={orderType} value={orderType}>{capitalize(orderType)}</option>
         ))}
       </Select>
@@ -61,13 +57,12 @@ export default function OrderInput({ areas, areasById, order, player, position, 
           {Object.values(areas).map(area => <option key={area.id} value={area.id}>{area.name}</option>)}
         </Select>
       )}
-      {([ORDER_TYPES.MOVE, ORDER_TYPES.SUPPORT, ORDER_TYPES.CONVOY].includes(order.orderType)) && (
+      {([ORDER_TYPES.MOVE, ORDER_TYPES.SUPPORT, ORDER_TYPES.CONVOY, ORDER_TYPES.RETREAT].includes(order.orderType)) && (
         <Select className="w-24" name="areaToId" value={order.areaToId || '0'} onChange={onChange}>
           {!order.areaToId && <option value="0" disabled>To</option>}
           {Object.values(areas).map(area => <option key={area.id} value={area.id}>{area.name}</option>)}
         </Select>
       )}
-      {resolution && <ResolutionBadge resolution={resolution} /> }
     </div>
   );
 }

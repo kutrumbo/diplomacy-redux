@@ -19,9 +19,13 @@ export const NATIONALITY_COLORS = {
 };
 
 export const ORDER_TYPES = {
+  BUILD_ARMY: 'build_army',
+  BUILD_FLEET: 'build_fleet',
   CONVOY: 'convoy',
+  DISBAND: 'disband',
   HOLD: 'hold',
   MOVE: 'move',
+  RETREAT: 'retreat',
   SUPPORT: 'support',
 };
 
