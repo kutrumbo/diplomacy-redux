@@ -20,7 +20,7 @@ const allowableOrderTypes = (unitType) => {
   return (unitType === UNIT_TYPES.FLEET) ? ORDER_VALUES : without(ORDER_VALUES, ORDER_TYPES.CONVOY);
 }
 
-export default function OrderInput({ areas, areasById, order, position, resolution, updateOrder }) {
+export default function OrderInput({ areas, areasById, order, player, position, resolution, updateOrder }) {
 
   const onChange = (event) => {
     const updatedOrder = { ...order, [event.target.name]: event.target.value };
@@ -41,7 +41,7 @@ export default function OrderInput({ areas, areasById, order, position, resoluti
   return (
     <div className="flex items-center gap-x-2 mb-4">
       <div className='w-20 text-sm'>
-        {capitalize(position.nationality)}
+        {capitalize(player.nationality)}
       </div>
       <div className='w-20 text-sm'>
         {capitalize(position.unitType)}

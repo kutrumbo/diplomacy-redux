@@ -4,7 +4,13 @@ module Api
       game = Game.find(params[:id])
       current_turn = game.current_turn
       # TODO: should only show own orders once we implement users
-      render json: game.as_json.merge(turn: current_turn, positions: current_turn.positions, orders: current_turn.orders, year: current_turn.year)
+      render json: game.as_json.merge(
+        orders: current_turn.orders,
+        players: game.players,
+        positions: current_turn.positions,
+        turn: current_turn,
+        year: current_turn.year,
+      )
     end
 
     def update_orders
@@ -16,6 +22,7 @@ module Api
         updated_orders.each do |updated_order|
           current_turn.orders.find(updated_order[:id]).update!(updated_order)
         end
+        TurnService.process_turn(current_turn.reload)
       end
 
       render json: { success: true }

@@ -25,7 +25,8 @@ export default function Game() {
     return <div>Loading</div>;
   }
 
-  const { positions } = game;
+  const { players, positions } = game;
+  const playersById = groupById(players);
   const positionsById = groupById(positions);
   const areasById = groupById(areas, 'name');
 
@@ -38,8 +39,8 @@ export default function Game() {
   const submitOrders = async () => {
     setIsSubmitting(true);
     const result = await syncOrders({ gameId: game.id, orders }).unwrap();
+    // TODO: do we need to check result?
     setIsSubmitting(false);
-    console.log(result);
   }
 
   return (
@@ -53,7 +54,8 @@ export default function Game() {
             areas={areas}
             areasById={areasById}
             order={order}
-            position={positionsById[order.id]}
+            player={playersById[positionsById[order.positionId].playerId]}
+            position={positionsById[order.positionId]}
             resolution={[]}
             updateOrder={partial(updateOrder, index)}
           />
@@ -63,7 +65,7 @@ export default function Game() {
         </div>
       </div>
       <div className="w-[55%]">
-        <Map positions={positions} areasById={areasById} />
+        <Map playersById={playersById} positions={positions} areasById={areasById} />
       </div>
     </div>
   );

@@ -46,6 +46,10 @@ class Turn < ApplicationRecord
     self.type == WINTER
   end
 
+  def complete?
+    self.orders.all?(&:confirmed?)
+  end
+
   def previous_turn
     self.game.turns.find_by(number: self.number - 1)
   end

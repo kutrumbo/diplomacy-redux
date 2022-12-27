@@ -28,11 +28,11 @@ class Order < ApplicationRecord
   ].freeze
 
   belongs_to :position
-  has_one :turn, through: :position
   belongs_to :area_from, class_name: 'Area', optional: true
   belongs_to :area_to, class_name: 'Area', optional: true
   belongs_to :coast_from, class_name: 'Coast', optional: true
   belongs_to :coast_to, class_name: 'Coast', optional: true
+  delegate :turn, to: :position
 
   validates_inclusion_of :resolution, in: RESOLUTIONS, allow_nil: true
   validates_inclusion_of :order_type, in: ORDER_TYPES, allow_nil: true
@@ -42,7 +42,16 @@ class Order < ApplicationRecord
   scope :succeeded, -> { where(resolution: SUCCEEDED) }
   scope :failed, -> { where(resolution: FAILED) }
 
-  after_update { |order| TurnService.process_turn(order.turn) }
+  before_validation do |order|
+    if order.move? || order.hold?
+      order.area_from = order.position.area
+      order.coast_from = order.position.coast
+    end
+    if order.hold?
+      order.area_to = order.position.area
+      order.coast_to = order.position.coast
+    end
+  end
 
   RESOLUTIONS.each do |resolution|
     define_method("#{resolution}?") do

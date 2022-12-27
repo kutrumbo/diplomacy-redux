@@ -8,7 +8,9 @@ module ResolutionService
     if previous_turn.attack?
       self.process_attack_turn(previous_turn, next_turn)
     elsif previous_turn.retreat?
+      self.process_retreat_turn(previous_turn, next_turn)
     else
+      self.process_build_turn(previous_turn, next_turn)
     end
   end
 
@@ -49,6 +51,31 @@ module ResolutionService
         new_position = position.dup
         new_position.update!(turn: next_turn)
       end
+    end
+
+    # TODO: set nationality if winter
+  end
+
+  def self.process_retreat_turn(previous_turn, next_turn)
+    previous_turn.positions.each do |position|
+      new_position = position.dup
+      if position.order.present?
+        next if position.order.disband?
+        next if (position.order.retreat? && position.order.failed?)
+      end
+      new_position.update!(
+        turn: next_turn,
+        area: position.order.present? ? position.order.area_to : position.area,
+        coast: position.order.present? ? position.order.coast_to : position.coast,
+        dislodged: false,
+      )
+    end
+  end
+
+  def self.process_build_turn(previous_turn, next_turn)
+    # TODO:
+    previous_turn.positions.each do |position|
+      new_position.update!(turn: next_turn)
     end
   end
 end

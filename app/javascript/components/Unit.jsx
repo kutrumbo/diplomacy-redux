@@ -24,10 +24,10 @@ function Fleet({ className }) {
   );
 };
 
-export default function Unit({ areaId, areasById={areasById}, nationality, size, unitType }) {
+export default function Unit({ areasById={areasById}, player, position, size }) {
   const clazz = classNames(
-    areaPositionClassName(areasById[areaId]),
-    NATIONALITY_COLORS[nationality],
+    areaPositionClassName(areasById[position.areaId]),
+    NATIONALITY_COLORS[player.nationality],
     'absolute drop-shadow-lg',
     {
       'w-8 h-8': size === UNIT_SIZES.SMALL,
@@ -35,5 +35,5 @@ export default function Unit({ areaId, areasById={areasById}, nationality, size,
     },
   );
 
-  return (unitType === UNIT_TYPES.ARMY) ? <Army className={clazz} /> : <Fleet className={clazz} />;
+  return (position.unitType === UNIT_TYPES.ARMY) ? <Army className={clazz} /> : <Fleet className={clazz} />;
 }

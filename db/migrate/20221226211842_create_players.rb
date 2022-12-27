@@ -9,6 +9,6 @@ class CreatePlayers < ActiveRecord::Migration[7.0]
 
     add_column :positions, :dislodged, :boolean, default: false, null: false
     add_reference :positions, :player, foreign_key: true, null: false
-    change_column_null :positions, :nationality, false
+    change_column_null :positions, :nationality, true
   end
 end

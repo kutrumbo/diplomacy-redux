@@ -12,7 +12,7 @@ const calcUnitSize = (width) => {
   }
 };
 
-export default function Map({ areasById, className = '', positions }) {
+export default function Map({ areasById, className = '', playersById, positions }) {
   const ref = useRef(null);
   const [width, setWidth] = useState(0);
   const getWidth = () => ref.current.offsetWidth;
@@ -38,7 +38,15 @@ export default function Map({ areasById, className = '', positions }) {
   return (
     <div className={clazz} ref={ref} >
       <img className="object-cover" src={fixAssetSrc(mapSrc)} />
-      {positions.map(position => <Unit key={position.id} areasById={areasById} size={calcUnitSize(width)} {...position} />)}
+      {positions.map(position => (
+        <Unit
+          key={position.id}
+          areasById={areasById}
+          size={calcUnitSize(width)}
+          player={playersById[position.playerId]}
+          position={position}
+        />
+      ))}
     </div>
   );
 }

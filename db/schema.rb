@@ -73,7 +73,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_26_211842) do
   end
 
   create_table "positions", force: :cascade do |t|
-    t.string "nationality", null: false
+    t.string "nationality"
     t.string "unit_type"
     t.integer "area_id", null: false
     t.integer "coast_id"
