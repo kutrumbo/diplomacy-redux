@@ -14,7 +14,7 @@ export const NATIONALITY_COLORS = {
   [NATIONALITIES.FRANCE]: 'fill-cyan-500',
   [NATIONALITIES.GERMANY]: 'fill-stone-600',
   [NATIONALITIES.ITALY]: 'fill-green-500',
-  [NATIONALITIES.RUSSIA]: 'fill-slate-500',
+  [NATIONALITIES.RUSSIA]: 'fill-slate-400',
   [NATIONALITIES.TURKEY]: 'fill-amber-500',
 };
 

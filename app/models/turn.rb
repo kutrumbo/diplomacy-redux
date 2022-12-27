@@ -18,7 +18,7 @@ class Turn < ApplicationRecord
 
   belongs_to :game
   has_many :positions, dependent: :destroy
-  has_many :orders
+  has_many :orders, through: :positions
 
   validates_inclusion_of :type, in: TURN_TYPES
 

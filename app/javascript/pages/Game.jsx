@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { partial } from 'lodash';
+import { capitalize, partial } from 'lodash';
 import { useGetAreasQuery, useGetGameQuery, useUpdateOrdersMutation } from '../api';
 import{ groupById } from '../utils';
 import Button from '../components/Button';
@@ -46,7 +46,7 @@ export default function Game() {
     <div className="flex min-h-screen">
       <div className="w-[45%] p-8">
         <h1 className="text-xl mb-8">Game: {game.name}</h1>
-        <h2 className="text-l mb-8">Turn: {game.turn.type}</h2>
+        <h2 className="text-l mb-8">Turn: {capitalize(game.turn.type)} {game.year}</h2>
         {orders.map((order, index) => (
           <OrderInput
             key={index}
