@@ -43,11 +43,11 @@ class Order < ApplicationRecord
   scope :failed, -> { where(resolution: FAILED) }
 
   before_validation do |order|
-    if order.move? || order.hold?
+    unless (order.convoy? || order.support?)
       order.area_from = order.position.area
       order.coast_from = order.position.coast
     end
-    if order.hold?
+    unless (order.convoy? || order.move? || order.retreat? || order.support?)
       order.area_to = order.position.area
       order.coast_to = order.position.coast
     end

@@ -6,7 +6,7 @@ module TurnService
 
     ActiveRecord::Base.transaction do
       if turn.complete?
-        AdjudicationService.new(turn.orders).adjudicate
+        AdjudicationService.new(turn.orders).adjudicate if turn.orders.present?
 
         turn.orders.each(&:save!)
 

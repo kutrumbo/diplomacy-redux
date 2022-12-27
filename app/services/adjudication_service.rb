@@ -3,6 +3,7 @@ class AdjudicationService
     # TODO: validate that orders are valid type based on turn type
     @orders = orders
     @positions = @orders.map(&:position)
+    @turn = @positions.first.turn
     @support_hash = @orders.select(&:support?).group_by do |support_order|
       @orders.select(&:move?).find { |move_order| (support_order.area_from == move_order.position.area) && (support_order.area_to == move_order.area_to) }
     end
@@ -11,6 +12,16 @@ class AdjudicationService
   def adjudicate
     self.fail_invalid_orders
 
+    if @turn.attack?
+      self.adjudicate_attack_orders
+    elsif @turn.retreat?
+      self.adjudicate_retreat_orders
+    else
+      self.adjudicate_build_orders
+    end
+  end
+
+  def adjudicate_attack_orders
     # create dependency graphs based on move orders
     self.construct_incidence_matrix
     graphs = self.parse_disconnected_graphs
@@ -325,6 +336,20 @@ class AdjudicationService
     return false if (target_order.position.player.nationality != order.position.player.nationality)
     return false if (target_order.move? && target_order.resolution == Order::SUCCEEDED)
     true
+  end
+
+  def adjudicate_retreat_orders
+    # TODO: handle unsuccessful retreats
+    @orders.each do |order|
+      order.resolution = Order::SUCCEEDED
+    end
+  end
+
+  def adjudicate_build_orders
+    # TODO: handle too many builds
+    @orders.each do |order|
+      order.resolution = Order::SUCCEEDED
+    end
   end
 
   private

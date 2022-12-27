@@ -39,7 +39,7 @@ export default function Sandbox() {
       return resolutions;
     }, {});
     setResolutions(resolutionsById);
-  }
+  };
 
   return (
     <div className="flex min-h-screen">
