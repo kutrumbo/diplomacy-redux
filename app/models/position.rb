@@ -27,11 +27,13 @@ class Position < ApplicationRecord
   has_one :order, dependent: :destroy
 
   validates_inclusion_of :unit_type, in: UNIT_TYPES, allow_nil: true
-  validates_inclusion_of :nationality, in: NATIONALITIES
+  validates_inclusion_of :nationality, in: NATIONALITIES, allow_nil: true
 
   scope :supply_center, -> { joins(:area).merge(Area.supply_center) }
   scope :occupied, -> { where.not(nationality: nil) }
-  scope :retreating, -> { where(dislodged: true) }
+  scope :dislodged, -> { where(dislodged: true) }
+  scope :with_unit, -> { where.not(unit_type: nil) }
+  scope :without_unit, -> { where(unit_type: nil) }
 
   def army?
     self.unit_type == ARMY

@@ -37,6 +37,11 @@ class Order < ApplicationRecord
   validates_inclusion_of :resolution, in: RESOLUTIONS, allow_nil: true
   validates_inclusion_of :order_type, in: ORDER_TYPES, allow_nil: true
 
+  scope :move, -> { where(order_type: MOVE) }
+  scope :non_move, -> { where.not(order_type: MOVE) }
+  scope :succeeded, -> { where(resolution: SUCCEEDED) }
+  scope :failed, -> { where(resolution: FAILED) }
+
   after_update { |order| TurnService.process_turn(order.turn) }
 
   RESOLUTIONS.each do |resolution|

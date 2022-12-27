@@ -11,10 +11,26 @@ module TurnService
         next_turn = self.create_next_turn(turn.reload)
         ResolutionService.process_orders(turn, next_turn)
 
+        next_turn.reload
 
-        # check if there is a winner
-        # if not, create orders
-          # if no orders (i.e. no builds/disbands), immediately process turn
+        # if there is a victor, complete game
+        if victor = self.determine_victory(next_turn)
+          # TODO: set victor of game
+          return
+        end
+
+        # if no orders (i.e. no builds/disbands), immediately process turn
+        if next_turn.attack?
+          next_turn.positions.with_unit.each { |p| Order.create!(position: p) }
+        elsif next_turn.retreat?
+          # TODO: create retreat orders if necessary
+        else
+          # TODO: create build orders if necessary
+        end
+
+        if next_turn.reload.orders.empty?
+          self.process_turn(next_turn)
+        end
       end
     end
   end
