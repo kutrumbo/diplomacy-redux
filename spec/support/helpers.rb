@@ -9,7 +9,14 @@ module Helpers
     area_model = find_area(area)
     coast_model = coast && area_model.coasts.find_by(direction: coast)
     raise "Invalid coast direction: #{coast} for area: #{area_name}" if (coast && !coast_model)
-    build(:position, nationality: nationality, area: area_model, coast: coast_model, unit_type: unit_type, turn: turn, player: player || Player.new(nationality: nationality))
+    build(:position,
+      nationality: nationality,
+      area: area_model,
+      coast: coast_model,
+      unit_type: unit_type,
+      turn: turn || Turn.new(type: Turn::SPRING),
+      player: player || Player.new(nationality: nationality)
+    )
   end
 
   def create_position(nationality: Position::AUSTRIA, area:, unit_type: nil, coast: nil, turn: nil, player: nil)
