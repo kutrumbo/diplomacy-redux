@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_26_211842) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_11_054854) do
   create_table "areas", force: :cascade do |t|
     t.string "name", null: false
     t.string "area_type", null: false
@@ -57,6 +57,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_26_211842) do
     t.string "resolution"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "confirmed", default: false, null: false
     t.index ["area_from_id"], name: "index_orders_on_area_from_id"
     t.index ["area_to_id"], name: "index_orders_on_area_to_id"
     t.index ["coast_from_id"], name: "index_orders_on_coast_from_id"
