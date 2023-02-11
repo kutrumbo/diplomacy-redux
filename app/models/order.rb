@@ -66,7 +66,7 @@ class Order < ApplicationRecord
   end
 
   def confirmed?
-    self.order_type.present? && self.area_from_id.present? && self.area_to_id.present?
+    self.confirmed
   end
 
   def resolved?

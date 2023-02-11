@@ -1,5 +1,5 @@
 import React from 'react';
-import { capitalize } from 'lodash';
+import { capitalize, isUndefined, partialRight } from 'lodash';
 import { ORDER_TYPES, UNIT_TYPES } from '../const';
 import Select from './Select';
 
@@ -16,20 +16,24 @@ const allowableOrderTypes = (turn, unitType = null) => {
   }
 };
 
-export default function OrderInput({ areas, areasById, order, player, position, turn, updateOrder }) {
+const orderConfirmable = order => order.orderType && order.areaFromId && order.areaToId;
 
-  const onChange = (event) => {
-    const updatedOrder = { ...order, [event.target.name]: event.target.value };
+export default function OrderInput({ areas, areasById, order, player, position, turn, updateOrder }) {
+  const onChange = (event, value) => {
+    const updatedOrder = { ...order, [event.target.name]: isUndefined(value) ? event.target.value : value };
     if (event.target.name === 'orderType') {
       updatedOrder.areaFromId = null;
       updatedOrder.areaToId = null;
     }
     if (updatedOrder.orderType === ORDER_TYPES.HOLD) {
-      updatedOrder.areaFromId = updatedOrder.areaId;
-      updatedOrder.areaToId = updatedOrder.areaId;
+      updatedOrder.areaFromId = position.areaId;
+      updatedOrder.areaToId = position.areaId;
     }
     if (updatedOrder.orderType === ORDER_TYPES.MOVE) {
-      updatedOrder.areaFromId = updatedOrder.areaId;
+      updatedOrder.areaFromId = position.areaId;
+    }
+    if (event.target.name !== 'confirmed') {
+      updatedOrder.confirmed = false;
     }
     updateOrder(updatedOrder);
   };
@@ -44,6 +48,16 @@ export default function OrderInput({ areas, areasById, order, player, position, 
       </div>
       <div className='w-24 text-sm'>
         {areasById[position.areaId]}
+      </div>
+      <div>
+        <input
+          type="checkbox"
+          name="confirmed"
+          checked={order.confirmed}
+          className="accent-amber-300"
+          disabled={!orderConfirmable(order)}
+          onChange={partialRight(onChange, !order.confirmed)}
+        />
       </div>
       <Select className="w-20" name="orderType" value={order.orderType || '0'} onChange={onChange}>
         {!order.orderType && <option value="0" disabled>Order</option>}
