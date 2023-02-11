@@ -5,6 +5,17 @@ import { groupById } from '../utils';
 import Button from '../components/Button';
 import SandboxOrderInput from '../components/SandboxOrderInput';
 import Map from '../components/Map';
+import { NATIONALITIES } from '../const';
+
+const PLAYER_ID_MAP = Object.values(NATIONALITIES).reduce((obj, nationality, index) => {
+  obj[index] = { nationality };
+  return obj;
+}, {});
+
+const PLAYER_ID_BY_NATIONALITY = Object.values(NATIONALITIES).reduce((obj, nationality, index) => {
+  obj[nationality] = index;
+  return obj;
+}, {});
 
 export default function Sandbox() {
   const [orders, setOrders] = useState([{ id: 1 }])
@@ -54,6 +65,7 @@ export default function Sandbox() {
             removeOrder={partial(removeOrder, index)}
             resolution={resolutions[index + 1]}
             updateOrder={partial(updateOrder, index)}
+            playerIdByNationality={PLAYER_ID_BY_NATIONALITY}
           />
         ))}
         <Button onClick={addOrder} text="Add Order" neutral small />
@@ -62,7 +74,7 @@ export default function Sandbox() {
         </div>
       </div>
       <div className="w-[55%]">
-        <Map positions={positions} areasById={areasById} />
+        <Map positions={positions} areasById={areasById} playersById={PLAYER_ID_MAP} />
       </div>
     </div>
   );

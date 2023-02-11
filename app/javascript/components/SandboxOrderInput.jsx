@@ -15,7 +15,7 @@ function ResolutionBadge({ resolution }) {
   );
 }
 
-export default function OrderInput({ areas, order, orders, resolution, removeOrder, updateOrder }) {
+export default function SandboxOrderInput({ areas, playerIdByNationality, order, orders, resolution, removeOrder, updateOrder }) {
 
   const onChange = (event) => {
     const updatedOrder = { ...order, [event.target.name]: event.target.value };
@@ -30,6 +30,7 @@ export default function OrderInput({ areas, order, orders, resolution, removeOrd
     if (updatedOrder.orderType === ORDER_TYPES.MOVE) {
       updatedOrder.areaFrom = updatedOrder.areaId;
     }
+    updatedOrder.playerId = playerIdByNationality[order.nationality];
     updateOrder(updatedOrder);
   };
 
