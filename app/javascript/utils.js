@@ -81,7 +81,7 @@ const AREA_COORDS = {
   livonia: 'top-[43%] left-[63%]',
   london: 'top-[48%] left-[30%]',
   marseilles: 'top-[70%] left-[32.5%]',
-  mid_atlantic_ocean: 'to]%[-left-[, 5%]',
+  mid_atlantic_ocean: 'top-[57%] left-[9%]',
   moscow: 'top-[43%] left-[73%]',
   munich: 'top-[58%] left-[42%]',
   naples: 'top-[86%] left-[50%]',

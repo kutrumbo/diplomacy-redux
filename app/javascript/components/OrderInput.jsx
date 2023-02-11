@@ -40,14 +40,14 @@ export default function OrderInput({ areas, areasById, order, player, position, 
   };
 
   return (
-    <div className="flex items-center gap-x-2 mb-4">
-      <div className='w-16 text-sm'>
+    <div className="flex items-center gap-x-2 mb-4 text-sm">
+      <div className='w-16'>
         {capitalize(player.nationality)}
       </div>
-      <div className='w-16 text-sm'>
+      <div className='w-16'>
         {capitalize(position.unitType)}
       </div>
-      <div className='w-24 text-sm'>
+      <div className='w-24'>
         {areasById[position.areaId]}
       </div>
       <div>

@@ -45,6 +45,12 @@ export default function Game() {
 
   const allOrdersConfirmed = !orders.find(order => !order.confirmed);
 
+  orders.forEach(order => {
+    if (!positionsById[order.positionId]) {
+      debugger;
+    }
+  })
+
   return (
     <div className="flex min-h-screen">
       <div className="w-[45%] p-8">
