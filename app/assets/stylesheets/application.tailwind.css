@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    @apply text-gray-900
+  }
+
   /* reset default Tailwind select styes */
   select {
     background-image: none;
