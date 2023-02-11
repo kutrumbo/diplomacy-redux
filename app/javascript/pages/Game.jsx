@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { startCase, capitalize, partial } from 'lodash';
+import { startCase, partial } from 'lodash';
 import { useGetAreasQuery, useGetGameQuery, useUpdateOrdersMutation } from '../api';
 import{ groupById } from '../utils';
 import Button from '../components/Button';
 import OrderInput from '../components/OrderInput';
+import { LoadingIndicator } from '../components/icons';
 import Map from '../components/Map';
 
 export default function Game() {
@@ -12,8 +13,7 @@ export default function Game() {
   const { data: game, isLoading: gameIsLoading } = useGetGameQuery(gameId);
   const { data: areas, isLoading: areasAreLoading } = useGetAreasQuery();
   const [orders, setOrders] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [syncOrders] = useUpdateOrdersMutation();
+  const [syncOrders, { isLoading: isSubmitting }] = useUpdateOrdersMutation();
 
   useEffect(() => {
     console.log(game);
@@ -23,7 +23,7 @@ export default function Game() {
   }, [game]);
 
   if (gameIsLoading || areasAreLoading) {
-    return <div>Loading</div>;
+    return <div className="flex gap-x-3">Loading {<LoadingIndicator className="w-4" />}</div>;
   }
 
   const { players, positions, turn } = game;
@@ -38,10 +38,8 @@ export default function Game() {
   };
 
   const submitOrders = async () => {
-    setIsSubmitting(true);
     const result = await syncOrders({ gameId: game.id, orders }).unwrap();
     // TODO: do we need to check result?
-    setIsSubmitting(false);
   }
 
   return (
