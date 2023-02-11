@@ -24,6 +24,7 @@ require("esbuild").build({
   outdir: path.join(process.cwd(), "app/assets/builds"),
   absWorkingDir: path.join(process.cwd(), "app/javascript"),
   watch: watch && watchOptions,
+  sourcemap: true,
   loader: {
     ".jpg": "file",
     ".svg": "file",
