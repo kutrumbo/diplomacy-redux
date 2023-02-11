@@ -7,6 +7,7 @@ import Button from '../components/Button';
 import OrderInput from '../components/OrderInput';
 import { LoadingIndicator } from '../components/icons';
 import Map from '../components/Map';
+import PreviousTurns from '../components/PreviousTurns';
 
 export default function Game() {
   const { gameId } = useParams()
@@ -26,7 +27,7 @@ export default function Game() {
     return <div className="flex gap-x-3">Loading {<LoadingIndicator className="w-4" />}</div>;
   }
 
-  const { players, positions, turn } = game;
+  const { pastOrders, players, positions, turn, turns } = game;
   const playersById = groupById(players);
   const positionsById = groupById(positions);
   const areasById = groupById(areas, 'name');
@@ -68,6 +69,10 @@ export default function Game() {
             onClick={submitOrders}
             text="Submit Orders"
           />
+        </div>
+        <div>
+          <h2 className="mb-8" >Previous Turns</h2>
+          <PreviousTurns pastOrders={pastOrders} turns={turns} playersById={playersById} areasById={areasById} />
         </div>
       </div>
       <div className="w-[55%]">

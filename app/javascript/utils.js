@@ -126,3 +126,5 @@ const AREA_COORDS = {
 };
 
 export const areaPositionClassName = (area) => AREA_COORDS[snakeCase(area)];
+
+export const turnYear = turn => 1901 + Math.floor(turn.number / 5);

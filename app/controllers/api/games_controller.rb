@@ -10,6 +10,8 @@ module Api
         positions: current_turn.positions,
         turn: current_turn,
         year: current_turn.year,
+        turns: game.turns.where.not(id: current_turn),
+        past_orders: game.orders.where.not(id: current_turn.orders).includes(:position).as_json(include: :position),
       )
     end
 
