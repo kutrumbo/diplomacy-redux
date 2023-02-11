@@ -42,6 +42,8 @@ export default function Game() {
     // TODO: do we need to check result?
   }
 
+  const allOrdersConfirmed = !orders.find(order => !order.confirmed);
+
   return (
     <div className="flex min-h-screen">
       <div className="w-[45%] p-8">
@@ -60,7 +62,12 @@ export default function Game() {
           />
         ))}
         <div className="flex w-full justify-end my-6">
-          <Button isLoading={isSubmitting} onClick={submitOrders} text="Submit Orders" />
+          <Button
+            disabled={!allOrdersConfirmed}
+            isLoading={isSubmitting}
+            onClick={submitOrders}
+            text="Submit Orders"
+          />
         </div>
       </div>
       <div className="w-[55%]">

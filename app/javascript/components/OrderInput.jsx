@@ -54,7 +54,7 @@ export default function OrderInput({ areas, areasById, order, player, position, 
           type="checkbox"
           name="confirmed"
           checked={order.confirmed}
-          className="accent-amber-300"
+          className="text-amber-600 disabled:bg-gray-200 disabled:cursor-not-allowed focus:ring-0"
           disabled={!orderConfirmable(order)}
           onChange={partialRight(onChange, !order.confirmed)}
         />

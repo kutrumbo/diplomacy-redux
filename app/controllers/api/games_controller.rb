@@ -16,7 +16,7 @@ module Api
     def update_orders
       game = Game.find(params[:game_id])
       current_turn = game.current_turn
-      updated_orders = params.permit(orders: [:id, :order_type, :area_from_id, :area_to_id])[:orders]
+      updated_orders = params.permit(orders: [:id, :confirmed, :order_type, :area_from_id, :area_to_id])[:orders]
 
       ActiveRecord::Base.transaction do
         updated_orders.each do |updated_order|
