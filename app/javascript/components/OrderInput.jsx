@@ -1,6 +1,7 @@
 import React from 'react';
 import { capitalize, isUndefined, partialRight } from 'lodash';
 import { ORDER_TYPES, UNIT_TYPES } from '../const';
+import Checkbox from './Checkbox';
 import Select from './Select';
 
 const allowableOrderTypes = (turn, unitType = null) => {
@@ -40,21 +41,19 @@ export default function OrderInput({ areas, areasById, order, player, position, 
 
   return (
     <div className="flex items-center gap-x-2 mb-4">
-      <div className='w-20 text-sm'>
+      <div className='w-16 text-sm'>
         {capitalize(player.nationality)}
       </div>
-      <div className='w-20 text-sm'>
+      <div className='w-16 text-sm'>
         {capitalize(position.unitType)}
       </div>
       <div className='w-24 text-sm'>
         {areasById[position.areaId]}
       </div>
       <div>
-        <input
-          type="checkbox"
+        <Checkbox
           name="confirmed"
           checked={order.confirmed}
-          className="text-amber-600 disabled:bg-gray-200 disabled:cursor-not-allowed focus:ring-0"
           disabled={!orderConfirmable(order)}
           onChange={partialRight(onChange, !order.confirmed)}
         />
