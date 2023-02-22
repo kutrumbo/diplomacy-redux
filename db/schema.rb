@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_02_11_054854) do
+ActiveRecord::Schema[7.0].define(version: 2023_02_22_061646) do
   create_table "areas", force: :cascade do |t|
     t.string "name", null: false
     t.string "area_type", null: false
     t.boolean "supply_center", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "nationality"
     t.index ["name"], name: "index_areas_on_name", unique: true
   end
 
