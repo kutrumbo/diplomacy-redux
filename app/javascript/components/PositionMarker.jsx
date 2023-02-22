@@ -24,7 +24,15 @@ function Fleet({ className }) {
   );
 };
 
-export default function Unit({ areasById={areasById}, player, position, size }) {
+function Unitless({ className }) {
+  return (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="25" />
+    </svg>
+  );
+};
+
+export default function PositionMarker({ areasById={areasById}, player, position, size }) {
   const clazz = classNames(
     areaPositionClassName(areasById[position.areaId]),
     NATIONALITY_COLORS[player.nationality],
@@ -35,5 +43,11 @@ export default function Unit({ areasById={areasById}, player, position, size }) 
     },
   );
 
-  return (position.unitType === UNIT_TYPES.ARMY) ? <Army className={clazz} /> : <Fleet className={clazz} />;
+  if (position.unitType === UNIT_TYPES.ARMY) {
+    return (<Army className={clazz} />);
+  } else if (position.unitType === UNIT_TYPES.FLEET) {
+    return (<Fleet className={clazz} />);
+  } else {
+    return (<Unitless className={clazz} />);
+  }
 }

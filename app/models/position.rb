@@ -34,6 +34,10 @@ class Position < ApplicationRecord
   scope :with_unit, -> { where.not(unit_type: nil) }
   scope :without_unit, -> { where(unit_type: nil) }
 
+  def unit?
+    self.unit_type.present?
+  end
+
   def army?
     self.unit_type == ARMY
   end

@@ -42,6 +42,10 @@ class Turn < ApplicationRecord
     self.type == FALL_RETREAT
   end
 
+  def spring?
+    self.type == SPRING
+  end
+
   def build?
     self.type == WINTER
   end

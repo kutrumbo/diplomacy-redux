@@ -15,8 +15,8 @@ module TurnService
 
         next_turn.reload
 
-        # if there is a victor, complete game
-        if victor = self.determine_victor(next_turn)
+        # if there is any victor, complete game
+        if victors = self.determine_victors(next_turn) && victors.present?
           # TODO: set victor of game
           return
         end
@@ -26,7 +26,21 @@ module TurnService
         elsif next_turn.retreat?
           next_turn.positions.dislodged.each { |p| Order.create!(position: p) }
         else
-          # TODO: create build/disband orders as necessary
+          num_of_supply_centers_by_player = next_turn.positions.supply_center.group(:player_id).count
+          next_turn.positions.with_unit.group(:player_id).count.each do |player_id, count|
+            if count > num_of_supply_centers_by_player[player_id]
+              # create disband orders
+              next_turn.positions.with_unit.where(player_id: player_id).each { |p| Order.create!(position: p) }
+            elsif count < num_of_supply_centers_by_player[player_id]
+              # create build orders
+              player_nationality = turn.game.players.find(player_id).nationality
+              next_turn.positions.where(player_id: player_id).
+                joins(:area).
+                merge(Area.supply_center.with_nationality(player_nationality)).
+                without_unit.
+                each { |p| Order.create!(position: p) }
+            end
+          end
         end
 
         # if no orders (i.e. no builds/disbands), immediately process turn
@@ -37,11 +51,11 @@ module TurnService
     end
   end
 
-  def self.determine_victor(next_turn)
+  def self.determine_victors(next_turn)
     # TODO: should only trigger at end of Fall move
-    next_turn.positions.with_unit.supply_center.group(:nationality).count.find do |_, count|
+    next_turn.positions.with_unit.supply_center.group(:player_id).count.select do |_, count|
       count >= WINNING_SUPPLY_CENTER_AMOUNT
-    end&.first
+    end
   end
 
   def self.create_next_turn(turn)

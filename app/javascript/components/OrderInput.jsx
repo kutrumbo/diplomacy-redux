@@ -26,11 +26,11 @@ export default function OrderInput({ areas, areasById, order, player, position, 
       updatedOrder.areaFromId = null;
       updatedOrder.areaToId = null;
     }
-    if (updatedOrder.orderType === ORDER_TYPES.HOLD) {
+    if ([ORDER_TYPES.BUILD_ARMY, ORDER_TYPES.BUILD_FLEET, ORDER_TYPES.DISBAND, ORDER_TYPES.HOLD].includes(updatedOrder.orderType)) {
       updatedOrder.areaFromId = position.areaId;
       updatedOrder.areaToId = position.areaId;
     }
-    if (updatedOrder.orderType === ORDER_TYPES.MOVE) {
+    if ([ORDER_TYPES.MOVE, ORDER_TYPES.RETREAT].includes(updatedOrder.orderType)) {
       updatedOrder.areaFromId = position.areaId;
     }
     if (event.target.name !== 'confirmed') {

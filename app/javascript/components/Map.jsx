@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
-import Unit, { UNIT_SIZES } from './Unit';
+import PositionMarker, { UNIT_SIZES } from './PositionMarker';
 import mapSrc from '../images/map.jpg';
 import { fixAssetSrc } from '../utils';
 
@@ -39,7 +39,7 @@ export default function Map({ areasById, className = '', playersById, positions 
     <div className={clazz} ref={ref} >
       <img className="object-cover" src={fixAssetSrc(mapSrc)} />
       {positions.map(position => (
-        <Unit
+        <PositionMarker
           key={position.id}
           areasById={areasById}
           size={calcUnitSize(width)}

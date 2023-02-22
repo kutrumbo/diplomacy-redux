@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { startCase, partial } from 'lodash';
+import { every, partial, startCase } from 'lodash';
 import { useGetAreasQuery, useGetGameQuery, useUpdateOrdersMutation } from '../api';
+import { ORDER_TYPES } from '../const';
 import{ groupById } from '../utils';
 import Button from '../components/Button';
 import OrderInput from '../components/OrderInput';
@@ -19,7 +20,13 @@ export default function Game() {
   useEffect(() => {
     console.log(game);
     if (game) {
-      setOrders(game.orders);
+      const orders = game.orders;
+      if (every(orders, o => !o.orderType)) {
+        // TODO: for testing
+        setOrders(orders.map(o => ({ ...o, orderType: ORDER_TYPES.HOLD })));
+      } else {
+        setOrders(game.orders);
+      }
     }
   }, [game]);
 
@@ -39,17 +46,11 @@ export default function Game() {
   };
 
   const submitOrders = async () => {
-    const result = await syncOrders({ gameId: game.id, orders }).unwrap();
     // TODO: do we need to check result?
+    syncOrders({ gameId: game.id, orders });
   }
 
   const allOrdersConfirmed = !orders.find(order => !order.confirmed);
-
-  orders.forEach(order => {
-    if (!positionsById[order.positionId]) {
-      debugger;
-    }
-  })
 
   return (
     <div className="flex min-h-screen">

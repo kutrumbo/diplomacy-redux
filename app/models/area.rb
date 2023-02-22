@@ -13,6 +13,11 @@ class Area < ApplicationRecord
   scope :sea, -> { where(area_type: SEA) }
   scope :supply_center, -> { where(supply_center: true) }
   scope :has_coasts, -> { joins(:coasts).distinct }
+  scope :with_nationality, ->(nationality) { where(nationality: nationality) }
+
+  def supply_center?
+    self.supply_center.present?
+  end
 
   def coasts?
     self.coasts.present?

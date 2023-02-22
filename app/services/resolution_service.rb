@@ -15,6 +15,13 @@ module ResolutionService
   end
 
   def self.process_attack_turn(previous_turn, next_turn)
+    # if beginning of year, create non-unit positions for all occupied supply centers
+    if previous_turn.spring?
+      previous_turn.positions.supply_center.with_unit.each do |position|
+        position.dup.update!(unit_type: nil, turn: next_turn)
+      end
+    end
+
     # process successful move orders first
     previous_turn.orders.move.succeeded.each do |order|
       new_position = order.position.dup
@@ -43,26 +50,20 @@ module ResolutionService
       )
     end
 
-    # process positions without a unit
+    # positions without a unit should remain
     previous_turn.positions.without_unit.each do |position|
-      became_occupied = previous_turn.orders.move.succeeded.where(area_to: position.area).present?
-
-      unless became_occupied
-        new_position = position.dup
-        new_position.update!(turn: next_turn)
-      end
+      position.dup.update!(turn: next_turn)
     end
-
-    # TODO: set nationality if winter
   end
 
   def self.process_retreat_turn(previous_turn, next_turn)
-    previous_turn.positions.each do |position|
+    previous_turn.positions.with_unit.each do |position|
       new_position = position.dup
       if position.order.present?
         next if position.order.disband?
         next if (position.order.retreat? && position.order.failed?)
       end
+
       new_position.update!(
         turn: next_turn,
         area: position.order.present? ? position.order.area_to : position.area,
@@ -70,13 +71,30 @@ module ResolutionService
         dislodged: false,
       )
     end
+
+    next_turn.reload
+    occupied_area_ids = next_turn.reload.positions.pluck(:area_id)
+
+    previous_turn.positions.without_unit.each do |position|
+      # do not replicate positions without a unit if area is occupied going into the build turn
+      next if (next_turn.build? && occupied_area_ids.include?(position.area_id))
+      position.dup.update!(turn: next_turn)
+    end
   end
 
   def self.process_build_turn(previous_turn, next_turn)
-    # TODO:
-    previous_turn.positions.each do |position|
+    previous_turn.positions.with_unit.each do |position|
+      next if position.order&.disband?
       new_position = position.dup
       new_position.update!(turn: next_turn)
+    end
+
+    previous_turn.positions.without_unit.joins(:order).each do |position|
+      if position.order.succeeded?
+        new_position = position.dup
+        new_unit_type = position.order.build_army? ? Position::ARMY : Position::FLEET
+        new_position.update!(unit_type: new_unit_type, turn: next_turn)
+      end
     end
   end
 end
