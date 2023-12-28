@@ -1,6 +1,8 @@
 module Api
   class OrdersController < ApplicationController
     def adjudicate
+      turn = Turn.new
+
       orders = params[:orders].map do |order_hash|
         Order.new(
           id: order_hash[:id],
@@ -8,6 +10,7 @@ module Api
             nationality: order_hash[:nationality],
             area_id: order_hash[:area_id],
             unit_type: order_hash[:unit_type],
+            turn: turn,
           ),
           order_type: order_hash[:order_type],
           area_from_id: order_hash[:area_from],
