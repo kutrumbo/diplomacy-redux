@@ -5,6 +5,13 @@ import Badge from './Badge';
 import Button from './Button';
 import Select from './Select';
 
+const SANDBOX_ORDER_TYPES = [
+  ORDER_TYPES.CONVOY,
+  ORDER_TYPES.HOLD,
+  ORDER_TYPES.MOVE,
+  ORDER_TYPES.SUPPORT,
+];
+
 function ResolutionBadge({ resolution }) {
   return (
     <Badge
@@ -50,7 +57,7 @@ export default function SandboxOrderInput({ areas, playerIdByNationality, order,
       </Select>
       <Select className="w-20" name="orderType" value={order.orderType || '0'} onChange={onChange}>
         {!order.orderType && <option value="0" disabled>Order</option>}
-        {Object.values(ORDER_TYPES).map(orderType => <option key={orderType} value={orderType}>{capitalize(orderType)}</option>)}
+        {SANDBOX_ORDER_TYPES.map(orderType => <option key={orderType} value={orderType}>{capitalize(orderType)}</option>)}
       </Select>
       {([ORDER_TYPES.SUPPORT, ORDER_TYPES.CONVOY].includes(order.orderType)) && (
         <Select className="w-24" name="areaFrom" value={order.areaFrom || '0'} onChange={onChange}>
