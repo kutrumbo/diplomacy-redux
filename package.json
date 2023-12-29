@@ -5,7 +5,7 @@
     "@headlessui/react": "^1.7.10",
     "@reduxjs/toolkit": "^1.9.1",
     "classnames": "^2.3.2",
-    "esbuild": "^0.16.8",
+    "esbuild": "^0.19.10",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -13,7 +13,7 @@
     "react-router-dom": "^6.5.0"
   },
   "scripts": {
-    "build": "esbuild app/javascript/*.* --bundle --outdir=app/assets/builds",
+    "build": "esbuild app/javascript/*.* --bundle --sourcemap --outdir=app/assets/builds --public-path=/assets --loader:.jpg=file --asset-names=[name]-[hash].digested",
     "start": "node esbuild-dev.config.js"
   },
   "packageManager": "yarn@1.22.19"

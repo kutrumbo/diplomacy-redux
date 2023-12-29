@@ -4,5 +4,6 @@
 options:
   label:
     fly_launch_runtime: rails
+  litefs: true
   postgresql: true
   prepare: false

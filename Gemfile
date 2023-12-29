@@ -43,6 +43,8 @@ gem "bootsnap", require: false
 # gem "image_processing", "~> 1.2"
 
 gem "jsbundling-rails"
+gem "dockerfile-rails", ">= 1.6", :group => :development
+gem "litestack", "~> 0.4.2"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -66,7 +68,5 @@ end
 group :test do
   gem 'database_cleaner-active_record'
 end
-
-gem "dockerfile-rails", ">= 1.6", :group => :development
 
 gem "pg", "~> 1.5"
