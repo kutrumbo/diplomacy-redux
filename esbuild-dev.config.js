@@ -3,27 +3,13 @@
 const path = require('path')
 const http = require('http')
 
-const watch = process.argv.includes('--watch')
 const clients = []
 
-const watchOptions = {
-  onRebuild: (error) => {
-    if (error) {
-      console.error('Build failed:', error)
-    } else {
-      console.log('Build succeeded')
-      clients.forEach((res) => res.write('data: update\n\n'))
-      clients.length = 0
-    }
-  }
-}
-
-require("esbuild").build({
+require("esbuild").context({
   entryPoints: ["application.jsx"],
   bundle: true,
   outdir: path.join(process.cwd(), "app/assets/builds"),
   absWorkingDir: path.join(process.cwd(), "app/javascript"),
-  watch: watch && watchOptions,
   sourcemap: true,
   loader: {
     ".jpg": "file",
@@ -33,9 +19,12 @@ require("esbuild").build({
   banner: {
     js: ' (() => new EventSource("http://localhost:8082").onmessage = () => location.reload())();',
   },
+}).then(ctx => {
+  ctx.watch();
 }).catch(() => process.exit(1));
 
 http.createServer((_, res) => {
+  console.log('in here');
   return clients.push(
     res.writeHead(200, {
       "Content-Type": "text/event-stream",

@@ -5,6 +5,7 @@ import { useGetAreasQuery, useGetGameQuery, useUpdateOrdersMutation } from '../a
 import { ORDER_TYPES } from '../const';
 import{ groupById } from '../utils';
 import Button from '../components/Button';
+import Checkbox from '../components/Checkbox';
 import OrderInput from '../components/OrderInput';
 import { LoadingIndicator } from '../components/icons';
 import Map from '../components/Map';
@@ -57,6 +58,17 @@ export default function Game() {
       <div className="w-[45%] p-8">
         <h1 className="text-xl mb-8">Game: {game.name}</h1>
         <h2 className="text-l mb-8">Turn: {startCase(game.turn.type)} {game.year}</h2>
+        {/* simulate order input row to align checkbox */}
+        <div className="flex gap-x-2 mb-2">
+          <div className='w-16' />
+          <div className='w-16' />
+          <div className='w-24' />
+          <Checkbox
+            name="confirmAll"
+            checked={allOrdersConfirmed}
+            onChange={() => setOrders(orders.map(order => ({ ...order, confirmed: !allOrdersConfirmed })))}
+          />
+        </div>
         {orders.map((order, index) => (
           <OrderInput
             key={index}
