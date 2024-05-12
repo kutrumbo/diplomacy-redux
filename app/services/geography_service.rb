@@ -586,5 +586,7 @@ module GeographyService
     Border.create!(area: black_sea, neighbor: constantinople, coastal: true)
     Border.create!(area: black_sea, neighbor: bulgaria, coast: bulgaria_ec, coastal: true)
     Border.create!(area: black_sea, neighbor: rumania, coastal: true)
+
+    true
   end
 end
